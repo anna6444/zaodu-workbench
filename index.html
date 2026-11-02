@@ -17,46 +17,31 @@
             display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
         }
         
-        /* 登录界面 */
-        #loginScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 999; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;
-        }
-        .login-box {
-            background: var(--card); padding: 30px 20px; border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 320px; text-align: center;
-        }
+        /* 登录 & 家长端 (保持原样) */
+        #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
+        .login-box { background: var(--card); padding: 30px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 320px; text-align: center; }
         .login-box h2 { margin-top: 0; color: var(--primary); }
-        .login-box input {
-            width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd;
-            border-radius: 8px; font-size: 18px; text-align: center; box-sizing: border-box;
-        }
+        .login-box input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 18px; text-align: center; box-sizing: border-box; }
         .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; }
 
-        /* 家长面板 */
         .admin-panel { background: #fff3e0; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px dashed var(--orange); }
         .admin-panel h3 { margin-top: 0; color: #E65100; }
         .admin-row { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;}
         .admin-row input { width: 50px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        
         .btn { border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; font-size: 15px; color: white; cursor: pointer; }
         .btn-save { background: var(--orange); }
         .btn-logout { background: var(--danger); float: right; padding: 6px 12px; font-size: 14px;}
         .btn-blue { background: var(--blue); width: 100%; margin-bottom: 10px;}
-        
         .edit-list { max-height: 350px; overflow-y: auto; background: #fff; border-radius: 8px; padding: 10px;}
         .edit-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;}
         .btn-edit { background: var(--blue); padding: 6px 12px; font-size: 14px;}
 
-        /* 打卡历史记录表 */
         .history-panel { background: #e3f2fd; border-color: var(--blue); }
         .history-panel h3 { color: #1565C0; }
         .history-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; background: #fff;}
         .history-table th, .history-table td { border: 1px solid #ddd; padding: 8px; }
         .history-table th { background: #f0f8ff; color: #1565C0; }
 
-        /* 全屏编辑弹窗 */
         #editModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: flex-end; }
         .modal-content { background: #fff; width: 100%; height: 90%; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -70,47 +55,55 @@
         .btn-cancel { background: #ccc; }
         .btn-confirm { background: var(--primary); }
 
-        /* 孩子端 - 主页 */
+        /* 孩子端主页 */
         #homeScreen { display: none; flex-direction: column; gap: 20px; justify-content: center; height: 80vh; }
-        .big-btn {
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            height: 40%; border-radius: 24px; color: white; font-size: 32px; font-weight: bold;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s;
-        }
+        .big-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 40%; border-radius: 24px; color: white; font-size: 32px; font-weight: bold; box-shadow: 0 8px 16px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; }
         .big-btn:active { transform: scale(0.98); }
         .btn-chinese { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
         .btn-english { background: linear-gradient(135deg, #2196F3, #1565C0); }
         .big-btn span { font-size: 16px; font-weight: normal; margin-top: 10px; opacity: 0.9;}
 
-        /* 孩子端 - 专注阅读页 */
+        /* 孩子端 - 专注阅读页 (通用) */
         #readingScreen { display: none; flex-direction: column; flex: 1; }
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .btn-back { background: transparent; border: none; font-size: 18px; color: var(--primary); font-weight: bold; padding: 5px; cursor: pointer; }
         .progress-badge { background: #e0f2f1; color: #00695c; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;}
-        
         .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
-        .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 30px; }
-        
-        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
-        .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; }
+        .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; }
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px;}
         .line-block:active { background-color: var(--highlight); }
         .line-pinyin { font-size: 16px; color: var(--subtext); margin-bottom: 8px; letter-spacing: 1px;}
         .line-text { font-size: 28px; font-weight: 500; line-height: 1.4; }
-
+        
         .bottom-action { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
         .btn-record { background: var(--orange); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer;}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
         .btn-next { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: none; cursor: pointer; }
-        
         .status-text { font-size: 14px; color: var(--orange); font-weight: bold; text-align: center; height: 20px;}
-        
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+        /* =========== 英语专属 UI (还原课本风格) =========== */
+        .english-header { text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 15px; margin-bottom: 15px;}
+        .english-letter-box { font-size: 80px; font-weight: 900; color: #E53935; line-height: 1; cursor: pointer; display: inline-block; padding: 10px 40px; border: 4px solid #64B5F6; border-radius: 16px; background: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .english-letter-box:active { background: #e3f2fd; }
+        
+        .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 15px; }
+        
+        .word-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 8px 16px; font-size: 24px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;}
+        .word-card:active { transform: scale(0.95); background: #FFECB3; }
+        .word-card span.emoji { font-size: 30px; }
+        
+        .phonics-list { display: flex; flex-direction: column; gap: 10px; }
+        .phonics-item { background: #f5f5f5; border-radius: 12px; padding: 10px 15px; font-size: 22px; font-weight: bold; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: space-between;}
+        .phonics-item:active { background: #e0e0e0; }
+        .phonics-item .highlight-letter { color: #E53935; font-size: 26px; font-weight: 900; margin-right: 10px;}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- 登录界面 -->
     <div id="loginScreen">
         <div class="login-box">
             <h2>🌞 早读工作台</h2>
@@ -120,7 +113,6 @@
         </div>
     </div>
 
-    <!-- 全屏编辑弹窗 -->
     <div id="editModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -129,7 +121,7 @@
             </div>
             <div class="modal-label">标题：</div>
             <input type="text" id="editTitle" class="modal-input">
-            <div class="modal-label">拼音（整段）：</div>
+            <div class="modal-label">拼音：</div>
             <textarea id="editPinyin" class="modal-input" style="height: 80px; resize:none;"></textarea>
             <div class="modal-label">正文（汉字）：</div>
             <textarea id="editContent" class="modal-textarea"></textarea>
@@ -140,7 +132,6 @@
         </div>
     </div>
 
-    <!-- 家长端界面 -->
     <div id="parentScreen" style="display: none;">
         <div class="admin-panel">
             <button class="btn btn-logout" onclick="logout()">退出</button>
@@ -153,29 +144,21 @@
                 <span>天</span>
                 <button class="btn btn-save" onclick="saveSettings()">手动修改进度</button>
             </div>
-            <p style="font-size:12px; color:#666; margin:0;">注：孩子完成当天任务后，系统会自动跳转下一天，无需手动修改。</p>
         </div>
-
         <div class="admin-panel history-panel">
             <h3>📊 孩子打卡记录</h3>
-            <div style="overflow-x: auto;">
-                <table class="history-table" id="historyTable">
-                    <thead>
-                        <tr><th>日期</th><th>已读篇数</th><th>状态</th></tr>
-                    </thead>
-                    <tbody id="historyBody"><tr><td colspan="3">加载中...</td></tr></tbody>
-                </table>
-            </div>
+            <table class="history-table" id="historyTable">
+                <thead><tr><th>日期</th><th>已读篇数</th><th>状态</th></tr></thead>
+                <tbody id="historyBody"><tr><td colspan="3">加载中...</td></tr></tbody>
+            </table>
         </div>
-
         <div class="admin-panel" style="background:#e3f2fd; border-color:var(--blue);">
             <h3 style="color:#1565C0;">📝 内容校验与修改</h3>
-            <button class="btn btn-blue" onclick="loadEditList()">刷新本周课文列表</button>
+            <button class="btn btn-blue" onclick="loadEditList()">刷新本周语文列表</button>
             <div class="edit-list" id="editListContainer"></div>
         </div>
     </div>
 
-    <!-- 孩子端 - 主页 -->
     <div id="homeScreen">
         <div class="header" style="text-align:center;">
             <h1 style="color:var(--primary); font-size:28px; margin-bottom:5px;">🌞 每日早读</h1>
@@ -185,14 +168,13 @@
             📖 语文晨读
             <span>点击进入专注阅读</span>
         </div>
-        <div class="big-btn btn-english" onclick="alert('英语模块还在建设中，敬请期待哦！')">
+        <div class="big-btn btn-english" onclick="openReading('英语')">
             🔤 英语复习
-            <span>敬请期待</span>
+            <span>Phonics & Words</span>
         </div>
         <button class="btn btn-logout" style="margin-top:20px; float:none; align-self:center; background:#999;" onclick="logout()">退出登录</button>
     </div>
 
-    <!-- 孩子端 - 专注阅读页 -->
     <div id="readingScreen">
         <div class="top-nav">
             <button class="btn-back" onclick="backToHome()">← 返回主页</button>
@@ -222,17 +204,21 @@
 
         let userRole = localStorage.getItem('morning_role'); 
         let currentWeek = 1, currentDay = 1;
-        
         let todayTasks = [];
         let currentTaskIndex = 0;
         let editingTaskId = null;
+        let currentSubject = '语文'; // 记录当前在读哪一科
 
+        // 语音引擎（支持中英双语）
         const synth = window.speechSynthesis;
-        function speak(text) {
+        function speak(text, lang = 'zh-CN') {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'zh-CN';
+            utterance.lang = lang;
             utterance.rate = 0.85; 
+            const voices = synth.getVoices();
+            const targetVoice = voices.find(v => v.lang.includes(lang));
+            if (targetVoice) utterance.voice = targetVoice;
             synth.speak(utterance);
         }
 
@@ -247,63 +233,45 @@
                 userRole = pwd === '8888' ? 'parent' : 'child';
                 localStorage.setItem('morning_role', userRole);
                 initApp();
-            } else {
-                alert('密码错误！');
-            }
+            } else { alert('密码错误！'); }
         }
 
-        function logout() {
-            localStorage.removeItem('morning_role');
-            location.reload();
-        }
+        function logout() { localStorage.removeItem('morning_role'); location.reload(); }
 
         async function initApp() {
             document.getElementById('loginScreen').style.display = 'none';
-            
             const { data: setting } = await db.from('morning_settings').select('*').eq('id', 1).single();
-            if (setting) {
-                currentWeek = setting.current_week;
-                currentDay = setting.current_day;
-            }
-            let dayName = currentDay === 7 ? '第7天 (总复习)' : `第${currentDay}天`;
+            if (setting) { currentWeek = setting.current_week; currentDay = setting.current_day; }
+            
+            let dayName = currentDay === 7 ? '第7天' : `第${currentDay}天`;
             document.getElementById('subtitle').innerText = `进度：第 ${currentWeek} 周 · ${dayName}`;
 
             if (userRole === 'parent') {
                 document.getElementById('parentScreen').style.display = 'block';
                 document.getElementById('setWeek').value = currentWeek;
                 document.getElementById('setDay').value = currentDay;
-                loadEditList();
-                loadHistory();
+                loadEditList(); loadHistory();
             } else {
                 document.getElementById('homeScreen').style.display = 'flex';
             }
         }
 
-        // ================= 家长端逻辑 =================
+        // --- 家长端逻辑（同以前，略作精简，只负责语文编辑）---
         async function saveSettings() {
             const w = parseInt(document.getElementById('setWeek').value);
             const d = parseInt(document.getElementById('setDay').value);
-            const btn = document.querySelector('.admin-panel .btn-save');
-            btn.innerText = '保存中...';
             await db.from('morning_settings').update({ current_week: w, current_day: d }).eq('id', 1);
-            alert('进度已更新！');
-            location.reload(); 
+            alert('进度已更新！'); location.reload(); 
         }
 
         async function loadHistory() {
             const tbody = document.getElementById('historyBody');
             const { data: records } = await db.from('morning_records').select('read_date, task_id');
             if (!records) { tbody.innerHTML = '<tr><td colspan="3">加载失败</td></tr>'; return; }
-
             const summary = {};
-            records.forEach(r => {
-                if (!summary[r.read_date]) summary[r.read_date] = new Set();
-                summary[r.read_date].add(r.task_id);
-            });
-
+            records.forEach(r => { if (!summary[r.read_date]) summary[r.read_date] = new Set(); summary[r.read_date].add(r.task_id); });
             const dates = Object.keys(summary).sort((a, b) => new Date(b) - new Date(a)).slice(0, 10);
             if (dates.length === 0) { tbody.innerHTML = '<tr><td colspan="3">暂无打卡记录</td></tr>'; return; }
-
             tbody.innerHTML = '';
             dates.forEach(date => {
                 const count = summary[date].size;
@@ -317,16 +285,10 @@
             const container = document.getElementById('editListContainer');
             container.innerHTML = '加载中...';
             const { data: tasks } = await db.from('morning_book').select('*').eq('week', w).order('day_index', { ascending: true });
-            if(!tasks || tasks.length === 0) { container.innerHTML = '本周暂无数据'; return; }
+            if(!tasks || tasks.length === 0) { container.innerHTML = '暂无数据'; return; }
             container.innerHTML = '';
             tasks.forEach(task => {
-                container.innerHTML += `
-                    <div class="edit-item">
-                        <div style="flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; margin-right:10px;">
-                            <strong>${task.day_index}.</strong> ${task.title}
-                        </div>
-                        <button class="btn btn-edit" onclick="openModal(${task.id})">修改</button>
-                    </div>`;
+                container.innerHTML += `<div class="edit-item"><div style="flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; margin-right:10px;"><strong>${task.day_index}.</strong> ${task.title}</div><button class="btn btn-edit" onclick="openModal(${task.id})">修改</button></div>`;
             });
         }
 
@@ -340,24 +302,17 @@
             document.getElementById('editContent').value = task.content || '';
             document.getElementById('editModal').style.display = 'flex';
         }
-
-        function closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-            editingTaskId = null;
-        }
-
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; editingTaskId = null; }
         async function saveTaskEdit() {
             if (!editingTaskId) return;
             const title = document.getElementById('editTitle').value;
             const pinyin = document.getElementById('editPinyin').value;
             const content = document.getElementById('editContent').value;
-            if (!content.trim()) { alert('正文不能为空！'); return; }
-
             const btn = document.querySelector('.btn-confirm');
             btn.innerText = '保存中...';
             const { error } = await db.from('morning_book').update({ title, pinyin, content }).eq('id', editingTaskId);
-            if (error) { alert('保存失败: ' + error.message); btn.innerText = '💾 保存修改'; }
-            else { alert('修改成功！'); closeModal(); loadEditList(); btn.innerText = '💾 保存修改'; }
+            if (error) alert('保存失败'); else { alert('修改成功！'); closeModal(); loadEditList(); }
+            btn.innerText = '💾 保存修改';
         }
 
         // ================= 孩子端逻辑 =================
@@ -367,60 +322,47 @@
         }
 
         async function openReading(subject) {
-            if (subject === '英语') return;
+            currentSubject = subject;
             document.getElementById('homeScreen').style.display = 'none';
             document.getElementById('readingScreen').style.display = 'flex';
 
-            let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
-            const { data: tasks, error } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
+            if (subject === '语文') {
+                let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
+                const { data: tasks } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
+                if (!tasks || tasks.length === 0) { alert('本周暂无语文内容'); backToHome(); return; }
+                
+                const today = getTodayDate();
+                const { data: records } = await db.from('morning_records').select('*').eq('read_date', today);
+                const recordMap = {}; if(records) records.forEach(r => recordMap[r.task_id] = r);
 
-            if (error || !tasks || tasks.length === 0) {
-                alert('本周暂无内容哦。'); backToHome(); return;
+                todayTasks = tasks.filter(task => {
+                    let target = (currentDay < 7 && task.day_index >= currentDay) ? 2 : 1;
+                    return (!recordMap[task.id] || recordMap[task.id].read_count < target);
+                });
+
+                if (todayTasks.length === 0) { await advanceProgress(); return; }
+                todayTasks.forEach(task => {
+                    task._targetCount = (currentDay < 7 && task.day_index >= currentDay) ? 2 : 1;
+                    task._currentCount = recordMap[task.id] ? recordMap[task.id].read_count : 0;
+                    task._recordId = recordMap[task.id] ? recordMap[task.id].id : null;
+                });
+                currentTaskIndex = 0;
+                renderChineseTask();
+
+            } else if (subject === '英语') {
+                // 英语直接拉取当天要读的那一课（这里暂时设为读取第一课）
+                const { data: engTasks } = await db.from('morning_english').select('*').limit(1);
+                if (!engTasks || engTasks.length === 0) { alert('英语题库为空，请先导入'); backToHome(); return; }
+                
+                // 英语为了简单，我们直接放进 todayTasks 里当作 1 个任务
+                todayTasks = engTasks;
+                currentTaskIndex = 0;
+                renderEnglishTask();
             }
-
-            const today = getTodayDate();
-            const { data: records } = await db.from('morning_records').select('*').eq('read_date', today);
-            const recordMap = {};
-            if(records) { records.forEach(r => recordMap[r.task_id] = r); }
-
-            todayTasks = tasks.filter(task => {
-                let target = (currentDay < 7 && task.day_index >= currentDay) ? 2 : 1;
-                let count = recordMap[task.id] ? recordMap[task.id].read_count : 0;
-                return count < target;
-            });
-
-            // 如果今天已经读完，自动推进进度
-            if (todayTasks.length === 0) {
-                await advanceProgress(); 
-                return;
-            }
-
-            todayTasks.forEach(task => {
-                task._targetCount = (currentDay < 7 && task.day_index >= currentDay) ? 2 : 1;
-                task._currentCount = recordMap[task.id] ? recordMap[task.id].read_count : 0;
-                task._recordId = recordMap[task.id] ? recordMap[task.id].id : null;
-            });
-
-            currentTaskIndex = 0;
-            renderCurrentTask();
         }
 
-        // 自动推进逻辑
-        async function advanceProgress() {
-            let newWeek = currentWeek;
-            let newDay = currentDay + 1;
-            
-            if (newDay > 7) {
-                newWeek = currentWeek + 1;
-                newDay = 1;
-            }
-
-            await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
-            alert(`🎉 太棒了！任务已全部完成！\n系统已自动为您解锁：第 ${newWeek} 周 · 第 ${newDay} 天\n请刷新页面开始新任务！`);
-            location.reload();
-        }
-
-        function renderCurrentTask() {
+        // --- 渲染语文 ---
+        function renderChineseTask() {
             const task = todayTasks[currentTaskIndex];
             document.getElementById('readingProgress').innerText = `${currentTaskIndex + 1} / ${todayTasks.length}`;
             document.getElementById('focusTitle').innerText = task.title;
@@ -430,17 +372,58 @@
 
             let html = '';
             sentences.forEach((sentence, index) => {
-                const clean = sentence.trim();
-                if(!clean) return;
+                const clean = sentence.trim(); if(!clean) return;
                 const py = pinyins[index] ? pinyins[index].trim() : '';
-                html += `
-                <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}')">
-                    ${py ? `<div class="line-pinyin">${py}</div>` : ''}
-                    <div class="line-text">${clean}</div>
-                </div>`;
+                html += `<div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN')">${py ? `<div class="line-pinyin">${py}</div>` : ''}<div class="line-text">${clean}</div></div>`;
             });
             document.getElementById('focusContent').innerHTML = html;
+            resetBottomButtons();
+        }
 
+        // --- 渲染英语 (教材风格) ---
+        function renderEnglishTask() {
+            const task = todayTasks[currentTaskIndex];
+            document.getElementById('readingProgress').innerText = `1 / 1`; // 英语一天只读一课
+            document.getElementById('focusTitle').innerText = task.unit_title;
+
+            // 解析单词 (比如 "apple 🍎, ant 🐜")
+            const wordsArray = task.words.split(',').map(w => w.trim());
+            // 解析拼读 (比如 "a-a-a apple, a-a-a ant")
+            const phonicsArray = task.phonics.split(',').map(p => p.trim());
+
+            let html = `
+                <div class="english-header">
+                    <div class="english-letter-box" onclick="speak('${task.main_letter}', 'en-US')">${task.main_letter}</div>
+                </div>
+                
+                <div style="text-align:center;"><span class="english-section-title">Point and Say</span></div>
+                <div class="word-grid">
+                    ${wordsArray.map(w => {
+                        // 提取纯英文单词用于发音，忽略后面的 emoji
+                        const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
+                        const emoji = w.replace(/[a-zA-Z\s]/g, "").trim();
+                        return `<div class="word-card" onclick="speak('${pureWord}', 'en-US')">
+                            <span>${pureWord}</span>
+                            ${emoji ? `<span class="emoji">${emoji}</span>` : ''}
+                        </div>`;
+                    }).join('')}
+                </div>
+
+                <div style="text-align:center;"><span class="english-section-title">Play with Sounds</span></div>
+                <div class="phonics-list">
+                    ${phonicsArray.map(p => {
+                        return `<div class="phonics-item" onclick="speak('${p}', 'en-US')">
+                            <span><span class="highlight-letter">${p.charAt(0)}</span> ${p}</span>
+                            <span style="color:#2196F3; font-size:16px;">🔊 点读</span>
+                        </div>`;
+                    }).join('')}
+                </div>
+            `;
+            document.getElementById('focusContent').innerHTML = html;
+            resetBottomButtons();
+        }
+
+        function resetBottomButtons() {
             const recBtn = document.getElementById('btnRecord');
             const nextBtn = document.getElementById('btnNext');
             const statusText = document.getElementById('statusText');
@@ -452,7 +435,6 @@
             isRecording = false;
         }
 
-        // 录音逻辑
         let mediaRecorder, audioChunks = [], isRecording = false;
 
         async function toggleRecord() {
@@ -468,8 +450,7 @@
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        new Audio(audioUrl).play(); 
+                        new Audio(URL.createObjectURL(audioBlob)).play(); 
                         btn.innerText = '🎤 重新录音';
                         btn.classList.remove('recording');
                         statusText.innerText = '🔊 听听读得对吗？';
@@ -491,32 +472,38 @@
         }
 
         async function nextTask() {
-            const task = todayTasks[currentTaskIndex];
-            const today = getTodayDate();
-            const newCount = task._currentCount + 1;
+            // 语文才进入数据库更新逻辑，英语暂时只做展示
+            if (currentSubject === '语文') {
+                const task = todayTasks[currentTaskIndex];
+                const today = getTodayDate();
+                const newCount = task._currentCount + 1;
+                if (task._recordId) await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
+                else await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
 
-            if (task._recordId) {
-                await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
+                if (newCount < task._targetCount) {
+                    task._currentCount = newCount;
+                    document.getElementById('statusText').innerText = `这篇还需读 ${task._targetCount - newCount} 遍哦。`;
+                    document.getElementById('btnRecord').innerText = '🎤 再读一遍';
+                    document.getElementById('btnNext').style.display = 'none';
+                    return;
+                }
+                currentTaskIndex++;
+                if (currentTaskIndex >= todayTasks.length) await advanceProgress();
+                else renderChineseTask();
             } else {
-                await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
+                // 英语读完了直接返回主页
+                alert('🎉 英语跟读完成！');
+                backToHome();
             }
+        }
 
-            if (newCount < task._targetCount) {
-                task._currentCount = newCount;
-                document.getElementById('statusText').innerText = `读完啦！这篇还需读 ${task._targetCount - newCount} 遍哦，请再录一次音。`;
-                document.getElementById('btnRecord').innerText = '🎤 再读一遍';
-                document.getElementById('btnNext').style.display = 'none';
-                return;
-            }
-
-            currentTaskIndex++;
-            if (currentTaskIndex >= todayTasks.length) {
-                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                // 触发自动推进
-                await advanceProgress();
-            } else {
-                renderCurrentTask();
-            }
+        async function advanceProgress() {
+            let newWeek = currentWeek;
+            let newDay = currentDay + 1;
+            if (newDay > 7) { newWeek = currentWeek + 1; newDay = 1; }
+            await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
+            alert(`🎉 太棒了！已完成！\n系统自动为您解锁：第 ${newWeek} 周 · 第 ${newDay} 天\n请刷新页面开始新任务！`);
+            location.reload();
         }
 
         window.onload = () => {
