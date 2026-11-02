@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的早读工作台</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --bg: #f0f7f4;
+            --card: #ffffff;
+            --text: #333333;
+            --subtext: #666666;
+            --highlight: #e8f5e9;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: var(--primary);
+            font-size: 24px;
+            margin: 0 0 5px 0;
+        }
+        .header p {
+            color: var(--subtext);
+            font-size: 14px;
+            margin: 0;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            padding-left: 10px;
+            border-left: 5px solid var(--primary);
+        }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .line {
+            padding: 10px 8px;
+            margin: 4px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .line:active {
+            background-color: var(--highlight);
+        }
+        .pinyin {
+            font-size: 12px;
+            color: var(--subtext);
+            margin-bottom: 4px;
+        }
+        .english-text {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .chinese-meaning {
+            font-size: 14px;
+            color: var(--subtext);
+            margin-top: 4px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            border-top: 1px dashed #eee;
+            padding-top: 15px;
+        }
+        .count-text {
+            font-size: 14px;
+            color: var(--subtext);
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:active {
+            background-color: #388E3C;
+        }
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🌞 每日早读工作台</h1>
+        <p>点文字听发音，读一遍点一下打卡</p>
+    </div>
+
+    <!-- 语文模块 -->
+    <div class="section-title">📖 语文 · 337晨读 (第一周)</div>
+    
+    <div class="card" id="card-meihua">
+        <div class="card-title">
+            <span>1. 梅花 (宋·王安石)</span>
+        </div>
+        <div class="line" onclick="speak('墙角数枝梅，凌寒独自开。', 'zh-CN')">
+            <span class="pinyin">qiáng jiǎo shù zhī méi , líng hán dú zì kāi</span>
+            <span>墙角数枝梅，凌寒独自开。</span>
+        </div>
+        <div class="line" onclick="speak('遥知不是雪，为有暗香来。', 'zh-CN')">
+            <span class="pinyin">yáo zhī bú shì xuě , wèi yǒu àn xiāng lái</span>
+            <span>遥知不是雪，为有暗香来。</span>
+        </div>
+        <div class="btn-group">
+            <span class="count-text">今天已读：<span id="count-meihua">0</span> 遍</span>
+            <button class="btn" onclick="addCount('meihua', 2)">+1遍</button>
+        </div>
+    </div>
+
+    <div class="card" id="card-guanque">
+        <div class="card-title">
+            <span>2. 登鹳雀楼 (唐·王之涣)</span>
+        </div>
+        <div class="line" onclick="speak('白日依山尽，黄河入海流。', 'zh-CN')">
+            <span class="pinyin">bái rì yī shān jìn , huáng hé rù hǎi liú</span>
+            <span>白日依山尽，黄河入海流。</span>
+        </div>
+        <div class="line" onclick="speak('欲穷千里目，更上一层楼。', 'zh-CN')">
+            <span class="pinyin">yù qióng qiān lǐ mù , gèng shàng yī céng lóu</span>
+            <span>欲穷千里目，更上一层楼。</span>
+        </div>
+        <div class="btn-group">
+            <span class="count-text">今天已读：<span id="count-guanque">0</span> 遍</span>
+            <button class="btn" onclick="addCount('guanque', 2)">+1遍</button>
+        </div>
+    </div>
+
+    <!-- 英语模块 -->
+    <div class="section-title">🔤 英语 · 人教版 (复习)</div>
+    
+    <div class="card" id="card-english">
+        <div class="card-title">
+            <span>Unit 1 打招呼</span>
+        </div>
+        <div class="line" onclick="speak('Hello! I am Wu Binbin.', 'en-US')">
+            <span class="english-text">Hello! I am Wu Binbin.</span>
+            <span class="chinese-meaning">你好！我是吴彬彬。</span>
+        </div>
+        <div class="line" onclick="speak('Hi! I am Sarah.', 'en-US')">
+            <span class="english-text">Hi! I am Sarah.</span>
+            <span class="chinese-meaning">你好！我是萨拉。</span>
+        </div>
+        <div class="line" onclick="speak('Good morning, Miss White.', 'en-US')">
+            <span class="english-text">Good morning, Miss White.</span>
+            <span class="chinese-meaning">早上好，怀特小姐。</span>
+        </div>
+        <div class="btn-group">
+            <span class="count-text">今天已读：<span id="count-english">0</span> 遍</span>
+            <button class="btn" onclick="addCount('english', 2)">+1遍</button>
+        </div>
+    </div>
+
+    <script>
+        // 语音朗读功能
+        function speak(text, lang) {
+            // 如果正在读，先停止
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang; // 'zh-CN' 或 'en-US'
+            utterance.rate = 0.9; // 语速稍微放慢一点点，适合早读
+            
+            // 尝试寻找更自然的语音包（特别是安卓系统）
+            const voices = window.speechSynthesis.getVoices();
+            const targetVoice = voices.find(v => v.lang.includes(lang) && v.name.includes('Google')) || voices.find(v => v.lang.includes(lang));
+            if (targetVoice) {
+                utterance.voice = targetVoice;
+            }
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // 获取今天的日期，用于本地存储 (格式: YYYY-MM-DD)
+        function getTodayDate() {
+            const d = new Date();
+            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+        const today = getTodayDate();
+
+        // 初始化打卡数据
+        function initCounts() {
+            const items = ['meihua', 'guanque', 'english'];
+            items.forEach(item => {
+                const key = `count-${item}-${today}`;
+                let stored = localStorage.getItem(key) || 0;
+                document.getElementById(`count-${item}`).innerText = stored;
+            });
+        }
+
+        // 增加打卡次数
+        function addCount(itemId, targetCount) {
+            const key = `count-${itemId}-${today}`;
+            let current = parseInt(localStorage.getItem(key) || 0);
+            
+            // 每次增加1遍
+            current += 1;
+            localStorage.setItem(key, current);
+            document.getElementById(`count-${itemId}`).innerText = current;
+
+            // 如果达到目标遍数，提示
+            if (current === targetCount) {
+                // 调用浏览器震动API(如果支持)
+                if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                alert("太棒了！这篇已达到今天的目标遍数！🎉");
+                // 稍微改一下按钮样式
+                const btn = document.querySelector(`#card-${itemId} .btn`);
+                btn.innerText = "已完成 ✓";
+                btn.style.backgroundColor = "#4CAF50";
+                btn.disabled = true;
+            } else if (current > targetCount) {
+                // 超额完成，允许继续点
+            }
+        }
+
+        // 页面加载时初始化
+        window.onload = () => {
+            initCounts();
+            // 预加载语音包（解决部分安卓设备第一声没声音的问题）
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+            }
+        };
+    </script>
+</body>
+</html>
