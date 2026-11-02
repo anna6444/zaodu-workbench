@@ -8,10 +8,12 @@
         :root {
             --primary: #4CAF50; --bg: #f0f7f4; --card: #ffffff;
             --text: #333333; --subtext: #666666; --highlight: #e8f5e9;
+            --danger: #f44336;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.6;
+            -webkit-user-select: none; user-select: none; /* 防止孩子误触选中文字 */
         }
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { color: var(--primary); font-size: 24px; margin: 0 0 5px 0; }
@@ -43,24 +45,39 @@
         .admin-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: center;}
         .admin-row input { width: 60px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         .btn-save { background: #FF9800; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 16px;}
-        .btn-logout { background: #f44336; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; float: right;}
+        .btn-logout { background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; float: right; font-size: 14px;}
 
+        /* 任务卡片 */
         .section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; padding-left: 10px; border-left: 5px solid var(--primary); }
         .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card-title { font-size: 16px; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        .card-title { font-size: 16px; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between;}
         
         .line {
             padding: 10px 8px; margin: 4px 0; border-radius: 8px;
-            cursor: pointer; transition: background 0.2s; font-size: 18px;
+            cursor: pointer; transition: background 0.2s; font-size: 20px;
             display: flex; flex-direction: column; align-items: center; text-align: center;
         }
         .line:active { background-color: var(--highlight); }
-        .pinyin { font-size: 13px; color: var(--subtext); margin-bottom: 4px; line-height: 1.2;}
+        .pinyin { font-size: 14px; color: var(--subtext); margin-bottom: 4px; }
         
-        .btn-group { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px; }
+        /* 底部操作区 */
+        .action-area { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px; }
         .count-text { font-size: 14px; color: var(--subtext); }
-        .btn { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 20px; font-size: 16px; font-weight: bold; cursor: pointer;}
-        .btn:disabled { background-color: #ccc; }
+        .btn { color: white; border: none; padding: 10px 20px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+        
+        .btn-play { background: #2196F3; } /* 播放标准音 */
+        .btn-record { background: #FF9800; } /* 录音 */
+        .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
+        .btn-done { background: var(--primary); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; animation: none; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .status-text { font-size: 14px; color: #FF9800; font-weight: bold; text-align: center; margin-top: 10px; height: 20px;}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -70,34 +87,32 @@
     <div id="loginScreen">
         <div class="login-box">
             <h2>🌞 早读工作台</h2>
-            <p style="color:#666; font-size:14px;">请输入密码进入</p>
+            <p style="color:#666; font-size:14px;">孩子：1234 / 家长：8888</p>
             <input type="password" id="pwdInput" placeholder="输入密码">
-            <button class="login-btn" onclick="handleLogin()">进入工作台</button>
-            <p style="font-size:12px; color:#aaa; margin-top:15px;">(孩子：1234 / 家长：8888)</p>
+            <button class="login-btn" onclick="handleLogin()">进入</button>
         </div>
     </div>
 
     <div class="header" id="mainHeader" style="display:none;">
-        <h1>🌞 每日早读</h1>
-        <p id="subtitle">正在加载进度...</p>
+        <h1 id="titleText">🌞 每日早读</h1>
+        <p id="subtitle" style="font-weight:bold; color:#4CAF50; font-size:16px;">加载中...</p>
     </div>
 
     <!-- 家长面板 -->
     <div id="adminPanel" class="admin-panel" style="display: none;">
-        <button class="btn-logout" onclick="logout()">退出</button>
+        <button class="btn-logout" onclick="logout()">退出家长端</button>
         <h3>👩‍🏫 家长控制台</h3>
         <div class="admin-row">
-            <span>当前进度：第</span>
+            <span>进度：第</span>
             <input type="number" id="setWeek" value="1">
             <span>周，第</span>
             <input type="number" id="setDay" value="1">
             <span>天</span>
             <button class="btn-save" onclick="saveSettings()">保存</button>
         </div>
-        <p style="font-size:12px; color:#666; margin:0;">修改后点击保存，孩子的平板刷新即可看到新任务。</p>
+        <p style="font-size:12px; color:#666; margin:0;">保存后，请让孩子下拉刷新页面。</p>
     </div>
 
-    <!-- 孩子端任务展示 -->
     <div id="taskContainer" style="display:none;"></div>
 
     <script>
@@ -105,39 +120,35 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11YnVjam95a2xweG9vYmdqeXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2Mzc4MDMsImV4cCI6MjEwMzIxMzgwM30.YfnUWqXIcnGY99Qbvz3vDIPnFf9ECC9M0dbM40cCr8k';
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let userRole = localStorage.getItem('morning_role'); // 'parent' 或 'child'
-        let currentWeek = 1;
-        let currentDay = 1;
+        let userRole = localStorage.getItem('morning_role'); 
+        let currentWeek = 1, currentDay = 1;
 
-        // 语音朗读
-        function speak(text, isEnglish) {
-            window.speechSynthesis.cancel();
+        // 语音引擎
+        const synth = window.speechSynthesis;
+        function speak(text) {
+            synth.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = isEnglish ? 'en-US' : 'zh-CN';
-            utterance.rate = 0.85; 
-            const voices = window.speechSynthesis.getVoices();
-            const targetVoice = voices.find(v => v.lang.includes(utterance.lang));
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.85; // 稍慢，适合孩子
+            const voices = synth.getVoices();
+            const targetVoice = voices.find(v => v.lang.includes('zh-CN'));
             if (targetVoice) utterance.voice = targetVoice;
-            window.speechSynthesis.speak(utterance);
+            synth.speak(utterance);
         }
 
-        // 获取今天日期 (用于打卡记录)
         function getTodayDate() {
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
 
-        // 登录逻辑
         function handleLogin() {
             const pwd = document.getElementById('pwdInput').value;
-            if (pwd === '8888') {
-                userRole = 'parent'; localStorage.setItem('morning_role', 'parent');
-                initApp();
-            } else if (pwd === '1234') {
-                userRole = 'child'; localStorage.setItem('morning_role', 'child');
+            if (pwd === '8888' || pwd === '1234') {
+                userRole = pwd === '8888' ? 'parent' : 'child';
+                localStorage.setItem('morning_role', userRole);
                 initApp();
             } else {
-                alert('密码错误！孩子输 1234，家长输 8888');
+                alert('密码错误！');
             }
         }
 
@@ -146,33 +157,33 @@
             location.reload();
         }
 
-        // 初始化
         async function initApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainHeader').style.display = 'block';
             document.getElementById('taskContainer').style.display = 'block';
 
-            // 从云端拉取当前设置的进度
             const { data: setting } = await db.from('morning_settings').select('*').eq('id', 1).single();
             if (setting) {
                 currentWeek = setting.current_week;
                 currentDay = setting.current_day;
             }
-            document.getElementById('subtitle').innerText = `第 ${currentWeek} 周 · 第 ${currentDay} 天`;
+            
+            let dayName = currentDay === 7 ? '第7天 (总复习)' : `第${currentDay}天`;
+            document.getElementById('subtitle').innerText = `进度：第 ${currentWeek} 周 · ${dayName}`;
 
             if (userRole === 'parent') {
                 document.getElementById('adminPanel').style.display = 'block';
                 document.getElementById('setWeek').value = currentWeek;
                 document.getElementById('setDay').value = currentDay;
-                document.getElementById('subtitle').innerText += ' (家长模式)';
-                document.getElementById('taskContainer').innerHTML = '<p style="text-align:center; color:#888;">家长模式下不展示具体课文，请去孩子端查看。</p>';
+                document.getElementById('titleText').innerText = '👩‍🏫 家长模式';
+                document.getElementById('taskContainer').innerHTML = '<p style="text-align:center; color:#888; margin-top:50px;">家长端不展示课文，请用孩子密码登录查看。</p>';
             } else {
                 document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('titleText').innerText = '🌞 每日早读';
                 loadTodayTasks();
             }
         }
 
-        // 家长保存进度
         async function saveSettings() {
             const w = parseInt(document.getElementById('setWeek').value);
             const d = parseInt(document.getElementById('setDay').value);
@@ -183,22 +194,15 @@
             if (error) {
                 alert('保存失败: ' + error.message);
             } else {
-                alert('进度已更新！孩子的平板刷新即可同步。');
-                document.getElementById('subtitle').innerText = `第 ${w} 周 · 第 ${d} 天 (家长模式)`;
+                alert('进度已更新！');
+                location.reload(); // 刷新页面
             }
-            btn.innerText = '保存';
         }
 
-        // 孩子端：根据337规则加载今天的任务
         async function loadTodayTasks() {
-            // 337排班规律：第N天，读前(N+2)篇。
-            // 第1天：1,2,3 (3篇)
-            // 第2天：1,2,3,4 (4篇)
-            // ... 第7天：1到9 (9篇)
-            let maxIndex = currentDay + 2;
-            if (currentDay >= 7) maxIndex = 9;
+            // 337排班逻辑：第N天读前(N+2)篇，第7天读全部9篇
+            let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
 
-            // 向云端请求数据
             const { data: tasks, error } = await db.from('morning_book')
                 .select('*')
                 .eq('week', currentWeek)
@@ -209,25 +213,26 @@
                 document.getElementById('taskContainer').innerHTML = `<p style="color:red;">加载失败: ${error.message}</p>`;
                 return;
             }
+            if (!tasks || tasks.length === 0) {
+                document.getElementById('taskContainer').innerHTML = `<p style="text-align:center; color:#888;">这周没有内容哦，请家长检查数据或进度。</p>`;
+                return;
+            }
 
             const container = document.getElementById('taskContainer');
-            container.innerHTML = `<div class="section-title">📖 第${currentWeek}周 · 第${currentDay}天任务</div>`;
+            container.innerHTML = '';
 
-            // 获取今天的打卡记录
+            // 获取今天已有的打卡记录
             const today = getTodayDate();
             const { data: records } = await db.from('morning_records').select('*').eq('read_date', today);
             const recordMap = {};
             if(records) { records.forEach(r => recordMap[r.task_id] = r); }
 
-            // 循环渲染每一篇课文
             tasks.forEach(task => {
-                // 337每天读几遍？
-                // 规律：如果是今天新增的课文，读2遍。如果是前几天读过的，读1遍。第7天全部读1遍。
+                // 计算今天每篇要读几遍
                 let targetCount = 1;
                 if (currentDay < 7) {
-                    if (task.day_index === currentDay) targetCount = 2; // 新增的读2遍
-                    if (task.day_index === currentDay + 1) targetCount = 2; // 提前预习的读2遍（对应PDF上的进度）
-                    if (task.day_index === currentDay + 2) targetCount = 2;
+                    // 如果是今天新学的、或提前预习的，读2遍
+                    if (task.day_index >= currentDay && task.day_index <= currentDay + 2) targetCount = 2;
                 } else {
                     targetCount = 1; // 第7天全部复习1遍
                 }
@@ -236,22 +241,19 @@
                 const count = rec ? rec.read_count : 0;
                 const isDone = count >= targetCount;
 
-                // 按标点自动拆分句子
+                // 按标点拆分句子和拼音
                 let sentences = task.content.match(/[^。！？；\n]+[。！？；]?/g) || [task.content];
-                
-                let linesHtml = '';
-                // 拼音也简单分割一下（按逗号句号分，如果长度对得上）
                 let pinyins = task.pinyin ? (task.pinyin.match(/[^,，。.！？；\n]+[,，。.！？；]?/g) || [task.pinyin]) : [];
 
+                let linesHtml = '';
                 sentences.forEach((sentence, index) => {
                     const cleanSentence = sentence.trim();
                     if(!cleanSentence) return;
-                    const safeSentence = cleanSentence.replace(/'/g, "\\'");
-                    // 尝试匹配对应的拼音
                     const pinyinText = pinyins[index] ? pinyins[index].trim() : '';
+                    const safeId = `line-${task.id}-${index}`; // 用于绑定录音按钮
 
                     linesHtml += `
-                    <div class="line" onclick="speak('${safeSentence}', false)">
+                    <div class="line" onclick="speak('${cleanSentence.replace(/'/g, "\\'")}')">
                         ${pinyinText ? `<span class="pinyin">${pinyinText}</span>` : ''}
                         <span>${cleanSentence}</span>
                     </div>`;
@@ -260,25 +262,95 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="card-title">${task.day_index}. ${task.title} (目标: ${targetCount}遍)</div>
+                    <div class="card-title">
+                        <span>${task.day_index}. ${task.title}</span>
+                        <span style="font-size:12px; color:#666; background:#eee; padding:2px 8px; border-radius:10px;">需读 ${targetCount} 遍</span>
+                    </div>
                     ${linesHtml}
-                    <div class="btn-group">
-                        <span class="count-text">今天已读：<strong id="count-${task.id}">${count}</strong> / ${targetCount} 遍</span>
-                        <button class="btn" style="${isDone ? 'background:#ccc;' : ''}" 
+                    
+                    <!-- 录音交互区 -->
+                    <div class="status-text" id="status-${task.id}"></div>
+                    <div class="action-area">
+                        <button class="btn btn-record" id="btn-rec-${task.id}" onclick="toggleRecord(${task.id}, '${task.content.replace(/'/g, "\\'")}')">
+                            🎤 开始录音跟读
+                        </button>
+                        
+                        <button class="btn btn-done" id="btn-done-${task.id}" 
+                                style="${isDone ? 'background:#ccc;' : 'display:none;'}" 
                                 onclick="addCount(${task.id}, ${targetCount}, ${count}, ${rec ? rec.id : null})"
                                 ${isDone ? 'disabled' : ''}>
-                            ${isDone ? '已完成 ✓' : '点我打卡 +1遍'}
+                            ${isDone ? '已完成 ✓' : '✓ 确认打卡'}
                         </button>
                     </div>
+                    <div class="count-text" style="margin-top:10px; text-align:right;">今天已读：<strong id="count-${task.id}">${count}</strong> / ${targetCount} 遍</div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // 打卡逻辑
+        // ================= 录音功能核心逻辑 =================
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        let currentRecordingTaskId = null;
+
+        async function toggleRecord(taskId, fullText) {
+            const btn = document.getElementById(`btn-rec-${taskId}`);
+            const statusText = document.getElementById(`status-${taskId}`);
+            const doneBtn = document.getElementById(`btn-done-${taskId}`);
+
+            if (!isRecording) {
+                // 开始录音
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    currentRecordingTaskId = taskId;
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        // 录音结束，生成音频并自动播放
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        const audio = new Audio(audioUrl);
+                        audio.play();
+                        
+                        // 播放完录音后，显示打卡按钮
+                        btn.innerText = '🎤 重新录音';
+                        btn.classList.remove('recording');
+                        statusText.innerText = '🔊 正在播放你的录音，听听读得对吗？';
+                        doneBtn.style.display = 'block';
+                        
+                        // 关闭麦克风释放资源
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    btn.innerText = '🛑 读完请点停止';
+                    btn.classList.add('recording');
+                    statusText.innerText = '正在录音...请大声朗读';
+                    doneBtn.style.display = 'none'; // 录音时隐藏打卡按钮
+
+                } catch (err) {
+                    alert('无法访问麦克风！请确保网页使用的是 https，并允许麦克风权限。');
+                    console.error(err);
+                }
+            } else {
+                // 停止录音
+                mediaRecorder.stop();
+                isRecording = false;
+                statusText.innerText = '录音完成';
+            }
+        }
+
         async function addCount(taskId, targetCount, currentCount, recordId) {
             const newCount = currentCount + 1;
             document.getElementById(`count-${taskId}`).innerText = newCount;
+            document.getElementById(`status-${taskId}`).innerText = '';
 
             const today = getTodayDate();
             let error;
@@ -297,21 +369,22 @@
 
             if (newCount >= targetCount) {
                 if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                const btn = document.querySelector(`button[onclick*="addCount(${taskId},"]`);
-                if(btn) {
-                    btn.innerText = "已完成 ✓";
-                    btn.style.background = "#ccc";
-                    btn.disabled = true;
-                }
+                const doneBtn = document.getElementById(`btn-done-${taskId}`);
+                doneBtn.innerText = "已完成 ✓";
+                doneBtn.style.background = "#ccc";
+                doneBtn.disabled = true;
+                document.getElementById(`btn-rec-${taskId}`).style.display = 'none'; // 读完了就隐藏录音按钮
+            } else {
+                // 还没读完，按钮重置回录音状态
+                const recBtn = document.getElementById(`btn-rec-${taskId}`);
+                recBtn.innerText = '🎤 再读一遍';
+                document.getElementById(`btn-done-${taskId}`).style.display = 'none';
             }
         }
 
-        // 页面加载
         window.onload = () => {
             if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
-            if (userRole) {
-                initApp(); // 如果之前登录过，直接免密进
-            }
+            if (userRole) initApp();
         };
     </script>
 </body>
