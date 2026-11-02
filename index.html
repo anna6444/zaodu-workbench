@@ -400,8 +400,8 @@
 
             let html = `
                 <div class="english-header">
-                    <!-- 点击大写字母时，只读 A，不读 A a 避免出现双音重复 -->
-                    <div class="english-letter-box" onclick="speak('${task.main_letter.split(' ')[0]}', 'en-US')">${task.main_letter}</div>
+                    <!-- 🎯 修复发音：点击大写字母时，只读 A，不读 A a 避免出现双音重复 -->
+                    <div class="english-letter-box" onclick="speak('A', 'en-US')">${task.main_letter}</div>
                 </div>
                 
                 <div style="text-align:center;"><span class="english-section-title">Point and Say</span></div>
