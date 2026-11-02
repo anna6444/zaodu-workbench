@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我的早读工作台</title>
+    <title>早读工作台</title>
     <style>
         :root {
             --primary: #4CAF50;
@@ -21,243 +21,267 @@
             padding: 15px;
             line-height: 1.6;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            color: var(--primary);
-            font-size: 24px;
-            margin: 0 0 5px 0;
-        }
-        .header p {
-            color: var(--subtext);
-            font-size: 14px;
-            margin: 0;
-        }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { color: var(--primary); font-size: 24px; margin: 0 0 5px 0; }
+        .header p { color: var(--subtext); font-size: 14px; margin: 0; }
+        
         .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 20px 0 10px 0;
-            padding-left: 10px;
-            border-left: 5px solid var(--primary);
+            font-size: 18px; font-weight: bold; margin: 20px 0 10px 0;
+            padding-left: 10px; border-left: 5px solid var(--primary);
         }
         .card {
-            background: var(--card);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            background: var(--card); border-radius: 12px; padding: 15px;
+            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         .card-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-size: 16px; font-weight: bold; color: var(--primary);
+            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
         }
         .line {
-            padding: 10px 8px;
-            margin: 4px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-            font-size: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
+            padding: 10px 8px; margin: 4px 0; border-radius: 8px;
+            cursor: pointer; transition: background 0.2s; font-size: 18px;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
         }
-        .line:active {
-            background-color: var(--highlight);
-        }
-        .pinyin {
-            font-size: 12px;
-            color: var(--subtext);
-            margin-bottom: 4px;
-        }
-        .english-text {
-            font-size: 20px;
-            font-weight: 500;
-        }
-        .chinese-meaning {
-            font-size: 14px;
-            color: var(--subtext);
-            margin-top: 4px;
-        }
+        .line:active { background-color: var(--highlight); }
+        .pinyin { font-size: 13px; color: var(--subtext); margin-bottom: 4px; }
+        .english-text { font-size: 20px; font-weight: 500; }
+        
         .btn-group {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            border-top: 1px dashed #eee;
-            padding-top: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px;
         }
-        .count-text {
-            font-size: 14px;
-            color: var(--subtext);
-        }
+        .count-text { font-size: 14px; color: var(--subtext); }
         .btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
+            background-color: var(--primary); color: white; border: none;
+            padding: 8px 16px; border-radius: 20px; font-size: 16px;
+            cursor: pointer; font-weight: bold;
         }
-        .btn:active {
-            background-color: #388E3C;
+        .btn:active { background-color: #388E3C; }
+        
+        /* 家长后台专用样式 */
+        .admin-panel { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .admin-panel input, .admin-panel select, .admin-panel textarea {
+            width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px;
+            box-sizing: border-box; font-size: 16px; font-family: inherit;
         }
-        .btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
+        .admin-panel button {
+            width: 100%; padding: 12px; background: #2196F3; color: white; border: none;
+            border-radius: 6px; font-size: 16px; font-weight: bold;
         }
+        .admin-panel button:active { background: #1976D2; }
     </style>
+    <!-- 引入 Supabase 客户端 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
+    <!-- 顶部栏 -->
     <div class="header">
         <h1>🌞 每日早读工作台</h1>
-        <p>点文字听发音，读一遍点一下打卡</p>
+        <p id="subtitle">点文字听发音，读一遍点一下打卡</p>
     </div>
 
-    <!-- 语文模块 -->
-    <div class="section-title">📖 语文 · 337晨读 (第一周)</div>
-    
-    <div class="card" id="card-meihua">
-        <div class="card-title">
-            <span>1. 梅花 (宋·王安石)</span>
-        </div>
-        <div class="line" onclick="speak('墙角数枝梅，凌寒独自开。', 'zh-CN')">
-            <span class="pinyin">qiáng jiǎo shù zhī méi , líng hán dú zì kāi</span>
-            <span>墙角数枝梅，凌寒独自开。</span>
-        </div>
-        <div class="line" onclick="speak('遥知不是雪，为有暗香来。', 'zh-CN')">
-            <span class="pinyin">yáo zhī bú shì xuě , wèi yǒu àn xiāng lái</span>
-            <span>遥知不是雪，为有暗香来。</span>
-        </div>
-        <div class="btn-group">
-            <span class="count-text">今天已读：<span id="count-meihua">0</span> 遍</span>
-            <button class="btn" onclick="addCount('meihua', 2)">+1遍</button>
-        </div>
+    <!-- 家长后台面板（默认隐藏） -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <h3 style="margin-top: 0; color: #2196F3;">👩‍🏫 家长发布任务</h3>
+        <input type="text" id="inputTitle" placeholder="任务标题 (如: 梅花)">
+        <select id="inputType">
+            <option value="语文">语文</option>
+            <option value="英语">英语</option>
+        </select>
+        <textarea id="inputContent" rows="2" placeholder="正文内容 (如: 墙角数枝梅...)"></textarea>
+        <input type="text" id="inputPinyin" placeholder="拼音/中文释义 (选填)">
+        <input type="number" id="inputTarget" placeholder="目标遍数 (默认2)" value="2">
+        <button onclick="publishTask()">🚀 发布到孩子的平板</button>
+        <p style="font-size: 12px; color: #888; text-align: center;">发布后，请让孩子的平板下拉刷新页面。</p>
     </div>
 
-    <div class="card" id="card-guanque">
-        <div class="card-title">
-            <span>2. 登鹳雀楼 (唐·王之涣)</span>
-        </div>
-        <div class="line" onclick="speak('白日依山尽，黄河入海流。', 'zh-CN')">
-            <span class="pinyin">bái rì yī shān jìn , huáng hé rù hǎi liú</span>
-            <span>白日依山尽，黄河入海流。</span>
-        </div>
-        <div class="line" onclick="speak('欲穷千里目，更上一层楼。', 'zh-CN')">
-            <span class="pinyin">yù qióng qiān lǐ mù , gèng shàng yī céng lóu</span>
-            <span>欲穷千里目，更上一层楼。</span>
-        </div>
-        <div class="btn-group">
-            <span class="count-text">今天已读：<span id="count-guanque">0</span> 遍</span>
-            <button class="btn" onclick="addCount('guanque', 2)">+1遍</button>
-        </div>
-    </div>
-
-    <!-- 英语模块 -->
-    <div class="section-title">🔤 英语 · 人教版 (复习)</div>
-    
-    <div class="card" id="card-english">
-        <div class="card-title">
-            <span>Unit 1 打招呼</span>
-        </div>
-        <div class="line" onclick="speak('Hello! I am Wu Binbin.', 'en-US')">
-            <span class="english-text">Hello! I am Wu Binbin.</span>
-            <span class="chinese-meaning">你好！我是吴彬彬。</span>
-        </div>
-        <div class="line" onclick="speak('Hi! I am Sarah.', 'en-US')">
-            <span class="english-text">Hi! I am Sarah.</span>
-            <span class="chinese-meaning">你好！我是萨拉。</span>
-        </div>
-        <div class="line" onclick="speak('Good morning, Miss White.', 'en-US')">
-            <span class="english-text">Good morning, Miss White.</span>
-            <span class="chinese-meaning">早上好，怀特小姐。</span>
-        </div>
-        <div class="btn-group">
-            <span class="count-text">今天已读：<span id="count-english">0</span> 遍</span>
-            <button class="btn" onclick="addCount('english', 2)">+1遍</button>
-        </div>
+    <!-- 任务展示区 -->
+    <div id="taskContainer">
+        <p style="text-align: center; color: #666;">正在从云端拉取任务...<br>(如果没有反应，请检查网络)</p>
     </div>
 
     <script>
-        // 语音朗读功能
+        // ================= 配置区 =================
+        // 填入你刚才给我的网址和密钥
+        const SUPABASE_URL = 'https://mubucjoyklpxoobgjyva.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11YnVjam95a2xweG9vYmdqeXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2Mzc4MDMsImV4cCI6MjEwMzIxMzgwM30.YfnUWqXIcnGY99Qbvz3vDIPnFf9ECC9M0dbM40cCr8k';
+        
+        // 初始化数据库连接
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // ==========================================
+
+        // 语音朗读
         function speak(text, lang) {
-            // 如果正在读，先停止
             window.speechSynthesis.cancel();
-            
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang; // 'zh-CN' 或 'en-US'
-            utterance.rate = 0.9; // 语速稍微放慢一点点，适合早读
-            
-            // 尝试寻找更自然的语音包（特别是安卓系统）
+            utterance.lang = lang === '语文' ? 'zh-CN' : 'en-US';
+            utterance.rate = 0.9; 
             const voices = window.speechSynthesis.getVoices();
-            const targetVoice = voices.find(v => v.lang.includes(lang) && v.name.includes('Google')) || voices.find(v => v.lang.includes(lang));
-            if (targetVoice) {
-                utterance.voice = targetVoice;
-            }
-            
+            const targetVoice = voices.find(v => v.lang.includes(utterance.lang));
+            if (targetVoice) utterance.voice = targetVoice;
             window.speechSynthesis.speak(utterance);
         }
 
-        // 获取今天的日期，用于本地存储 (格式: YYYY-MM-DD)
+        // 获取今天日期
         function getTodayDate() {
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
         const today = getTodayDate();
 
-        // 初始化打卡数据
-        function initCounts() {
-            const items = ['meihua', 'guanque', 'english'];
-            items.forEach(item => {
-                const key = `count-${item}-${today}`;
-                let stored = localStorage.getItem(key) || 0;
-                document.getElementById(`count-${item}`).innerText = stored;
-            });
+        // 检查是否是家长模式
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('admin') === '1';
+
+        if (isAdmin) {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('subtitle').innerText = '家长模式：在此发布任务';
         }
 
-        // 增加打卡次数
-        function addCount(itemId, targetCount) {
-            const key = `count-${itemId}-${today}`;
-            let current = parseInt(localStorage.getItem(key) || 0);
+        // 从云端加载任务
+        async function loadTasks() {
+            // 从 morning_tasks 表读取数据
+            const { data: tasks, error } = await db.from('morning_tasks').select('*').order('id', { ascending: true });
             
-            // 每次增加1遍
-            current += 1;
-            localStorage.setItem(key, current);
-            document.getElementById(`count-${itemId}`).innerText = current;
+            if (error) {
+                document.getElementById('taskContainer').innerHTML = `<p style="color:red; text-align:center;">加载失败: ${error.message}</p>`;
+                return;
+            }
 
-            // 如果达到目标遍数，提示
-            if (current === targetCount) {
-                // 调用浏览器震动API(如果支持)
+            if (tasks.length === 0) {
+                document.getElementById('taskContainer').innerHTML = `<p style="text-align:center;">暂时没有任务哦，请家长发布任务。</p>`;
+                return;
+            }
+
+            // 获取孩子今天的打卡记录
+            const { data: records } = await db.from('morning_records').select('*').eq('read_date', today);
+            const recordMap = {};
+            if(records) {
+                records.forEach(r => recordMap[r.task_id] = r);
+            }
+
+            // 渲染页面
+            const container = document.getElementById('taskContainer');
+            container.innerHTML = ''; 
+
+            // 按类型分组
+            const zhTasks = tasks.filter(t => t.type === '语文');
+            const enTasks = tasks.filter(t => t.type === '英语');
+
+            if(zhTasks.length > 0) renderSection('📖 语文 · 晨读', zhTasks, recordMap);
+            if(enTasks.length > 0) renderSection('🔤 英语 · 复习', enTasks, recordMap);
+        }
+
+        // 渲染模块
+        function renderSection(title, taskList, recordMap) {
+            const container = document.getElementById('taskContainer');
+            const section = document.createElement('div');
+            section.innerHTML = `<div class="section-title">${title}</div>`;
+            
+            taskList.forEach(task => {
+                const rec = recordMap[task.id];
+                const count = rec ? rec.read_count : 0;
+                const isDone = count >= task.target_count;
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-title"><span>${task.title}</span></div>
+                    <div class="line" onclick="speak('${task.content.replace(/'/g, "\\'")}', '${task.type}')">
+                        ${task.pinyin ? `<span class="pinyin">${task.pinyin}</span>` : ''}
+                        <span class="${task.type === '英语' ? 'english-text' : ''}">${task.content}</span>
+                    </div>
+                    <div class="btn-group">
+                        <span class="count-text">已读：<strong id="count-${task.id}">${count}</strong> / ${task.target_count} 遍</span>
+                        <button class="btn" style="${isDone ? 'background:#ccc;' : ''}" 
+                                onclick="addCount(${task.id}, ${task.target_count}, ${count}, ${rec ? rec.id : null})"
+                                ${isDone ? 'disabled' : ''}>
+                            ${isDone ? '已完成 ✓' : '+1遍'}
+                        </button>
+                    </div>
+                `;
+                section.appendChild(card);
+            });
+            container.appendChild(section);
+        }
+
+        // 增加遍数（同步到云端）
+        async function addCount(taskId, targetCount, currentCount, recordId) {
+            const newCount = currentCount + 1;
+            
+            // 更新界面
+            document.getElementById(`count-${taskId}`).innerText = newCount;
+
+            let error;
+            if (recordId) {
+                // 更新记录
+                const res = await db.from('morning_records').update({ read_count: newCount }).eq('id', recordId);
+                error = res.error;
+            } else {
+                // 插入新记录
+                const res = await db.from('morning_records').insert([{ task_id: taskId, read_count: newCount, read_date: today }]);
+                error = res.error;
+            }
+
+            if (error) {
+                alert('网络不好，打卡未同步到云端：' + error.message);
+                return;
+            }
+
+            // 如果达标了
+            if (newCount >= targetCount) {
                 if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                alert("太棒了！这篇已达到今天的目标遍数！🎉");
-                // 稍微改一下按钮样式
-                const btn = document.querySelector(`#card-${itemId} .btn`);
-                btn.innerText = "已完成 ✓";
-                btn.style.backgroundColor = "#4CAF50";
-                btn.disabled = true;
-            } else if (current > targetCount) {
-                // 超额完成，允许继续点
+                // 寻找按钮并修改样式
+                const btn = document.querySelector(`button[onclick*="addCount(${taskId},"]`);
+                if(btn) {
+                    btn.innerText = "已完成 ✓";
+                    btn.style.background = "#ccc";
+                    btn.disabled = true;
+                }
             }
         }
 
-        // 页面加载时初始化
-        window.onload = () => {
-            initCounts();
-            // 预加载语音包（解决部分安卓设备第一声没声音的问题）
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.getVoices();
+        // 家长发布任务
+        async function publishTask() {
+            const title = document.getElementById('inputTitle').value;
+            const type = document.getElementById('inputType').value;
+            const content = document.getElementById('inputContent').value;
+            const pinyin = document.getElementById('inputPinyin').value;
+            const target = parseInt(document.getElementById('inputTarget').value) || 2;
+
+            if (!title || !content) {
+                alert('标题和内容不能为空哦！');
+                return;
             }
+
+            const btn = document.querySelector('.admin-panel button');
+            btn.innerText = '正在上传...';
+            btn.disabled = true;
+
+            const { error } = await db.from('morning_tasks').insert([
+                { title: title, type: type, content: content, pinyin: pinyin, target_count: target }
+            ]);
+
+            if (error) {
+                alert('上传失败: ' + error.message);
+                btn.innerText = '🚀 发布到孩子的平板';
+                btn.disabled = false;
+            } else {
+                alert('发布成功！请去孩子的平板刷新页面。');
+                // 清空输入框
+                document.getElementById('inputTitle').value = '';
+                document.getElementById('inputContent').value = '';
+                document.getElementById('inputPinyin').value = '';
+                btn.innerText = '🚀 发布到孩子的平板';
+                btn.disabled = false;
+            }
+        }
+
+        // 页面初始化
+        window.onload = () => {
+            if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
+            loadTasks();
         };
     </script>
 </body>
