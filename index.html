@@ -6,18 +6,21 @@
     <title>早读工作台</title>
     <style>
         :root {
-            --primary: #4CAF50; --bg: #f0f7f4; --card: #ffffff;
-            --text: #333333; --subtext: #666666; --highlight: #e8f5e9;
+            --primary: #4CAF50; 
+            --blue: #2196F3;
+            --bg: #f0f7f4; 
+            --card: #ffffff;
+            --text: #333333; 
+            --subtext: #666666; 
+            --highlight: #e8f5e9;
             --danger: #f44336;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.6;
-            -webkit-user-select: none; user-select: none; /* 防止孩子误触选中文字 */
+            -webkit-user-select: none; user-select: none;
+            display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
         }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: var(--primary); font-size: 24px; margin: 0 0 5px 0; }
-        .header p { color: var(--subtext); font-size: 14px; margin: 0; }
         
         /* 登录界面 */
         #loginScreen {
@@ -40,44 +43,52 @@
         }
 
         /* 家长面板 */
-        .admin-panel { background: #fff3e0; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px dashed #FF9800;}
+        .admin-panel { background: #fff3e0; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px dashed #FF9800; }
         .admin-panel h3 { margin-top: 0; color: #E65100; }
-        .admin-row { display: flex; gap: 10px; margin-bottom: 15px; align-items: center;}
-        .admin-row input { width: 60px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        .btn-save { background: #FF9800; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 16px;}
+        .admin-row { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;}
+        .admin-row input { width: 50px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .btn-save { background: #FF9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; font-size: 14px;}
         .btn-logout { background: #f44336; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; float: right; font-size: 14px;}
+        
+        .edit-list { max-height: 400px; overflow-y: auto; background: #fff; border-radius: 8px; padding: 10px; margin-top:10px;}
+        .edit-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;}
+        .btn-edit { background: #2196F3; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 12px;}
 
-        /* 任务卡片 */
-        .section-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; padding-left: 10px; border-left: 5px solid var(--primary); }
-        .card { background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card-title { font-size: 16px; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between;}
-        
-        .line {
-            padding: 10px 8px; margin: 4px 0; border-radius: 8px;
-            cursor: pointer; transition: background 0.2s; font-size: 20px;
-            display: flex; flex-direction: column; align-items: center; text-align: center;
+        /* 孩子端 - 主页大按钮 */
+        #homeScreen { display: none; flex-direction: column; gap: 20px; justify-content: center; height: 80vh; }
+        .big-btn {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 40%; border-radius: 24px; color: white; font-size: 32px; font-weight: bold;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s;
         }
-        .line:active { background-color: var(--highlight); }
-        .pinyin { font-size: 14px; color: var(--subtext); margin-bottom: 4px; }
+        .big-btn:active { transform: scale(0.98); }
+        .btn-chinese { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+        .btn-english { background: linear-gradient(135deg, #2196F3, #1565C0); }
+        .big-btn span { font-size: 16px; font-weight: normal; margin-top: 10px; opacity: 0.9;}
+
+        /* 孩子端 - 专注阅读页 */
+        #readingScreen { display: none; flex-direction: column; flex: 1; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-back { background: transparent; border: none; font-size: 18px; color: var(--primary); font-weight: bold; padding: 5px; cursor: pointer; }
+        .progress-badge { background: #e0f2f1; color: #00695c; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;}
         
-        /* 底部操作区 */
-        .action-area { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px; }
-        .count-text { font-size: 14px; color: var(--subtext); }
-        .btn { color: white; border: none; padding: 10px 20px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+        .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
+        .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 30px; }
         
-        .btn-play { background: #2196F3; } /* 播放标准音 */
-        .btn-record { background: #FF9800; } /* 录音 */
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+        .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; }
+        .line-block:active { background-color: var(--highlight); }
+        .line-pinyin { font-size: 16px; color: var(--subtext); margin-bottom: 8px; letter-spacing: 1px;}
+        .line-text { font-size: 28px; font-weight: 500; line-height: 1.4; }
+
+        .bottom-action { margin-top: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .btn-record { background: #FF9800; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer;}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
-        .btn-done { background: var(--primary); }
-        .btn:disabled { background-color: #ccc; cursor: not-allowed; animation: none; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .status-text { font-size: 14px; color: #FF9800; font-weight: bold; text-align: center; margin-top: 10px; height: 20px;}
+        .btn-next { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: none; cursor: pointer; }
+        
+        .status-text { font-size: 14px; color: #FF9800; font-weight: bold; text-align: center; height: 20px;}
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -93,27 +104,71 @@
         </div>
     </div>
 
-    <div class="header" id="mainHeader" style="display:none;">
-        <h1 id="titleText">🌞 每日早读</h1>
-        <p id="subtitle" style="font-weight:bold; color:#4CAF50; font-size:16px;">加载中...</p>
-    </div>
-
-    <!-- 家长面板 -->
-    <div id="adminPanel" class="admin-panel" style="display: none;">
-        <button class="btn-logout" onclick="logout()">退出家长端</button>
-        <h3>👩‍🏫 家长控制台</h3>
-        <div class="admin-row">
-            <span>进度：第</span>
-            <input type="number" id="setWeek" value="1">
-            <span>周，第</span>
-            <input type="number" id="setDay" value="1">
-            <span>天</span>
-            <button class="btn-save" onclick="saveSettings()">保存</button>
+    <!-- 家长端界面 -->
+    <div id="parentScreen" style="display: none;">
+        <div class="admin-panel">
+            <button class="btn-logout" onclick="logout()">退出</button>
+            <h3>👩‍🏫 家长控制台</h3>
+            <div class="admin-row">
+                <span>进度：第</span>
+                <input type="number" id="setWeek" value="1">
+                <span>周，第</span>
+                <input type="number" id="setDay" value="1">
+                <span>天</span>
+                <button class="btn-save" onclick="saveSettings()">保存进度</button>
+            </div>
+            <p style="font-size:12px; color:#666; margin:0;">保存后，请让孩子刷新页面。</p>
         </div>
-        <p style="font-size:12px; color:#666; margin:0;">保存后，请让孩子下拉刷新页面。</p>
+
+        <div class="admin-panel" style="background:#e3f2fd; border-color:#2196F3;">
+            <h3 style="color:#1565C0;">📝 内容校验与修改</h3>
+            <p style="font-size:12px; color:#555; margin-bottom:10px;">AI提取PDF难免漏字，请在这里顺手检查修改，保存后孩子端立刻生效。</p>
+            <button class="btn-save" style="background:#2196F3; width:100%;" onclick="loadEditList()">刷新本周课文列表</button>
+            <div class="edit-list" id="editListContainer"></div>
+        </div>
     </div>
 
-    <div id="taskContainer" style="display:none;"></div>
+    <!-- 孩子端 - 主页 -->
+    <div id="homeScreen">
+        <div class="header" style="text-align:center;">
+            <h1 style="color:var(--primary); font-size:28px; margin-bottom:5px;">🌞 每日早读</h1>
+            <p id="subtitle" style="font-weight:bold; color:#666; font-size:16px;">加载中...</p>
+        </div>
+        <div class="big-btn btn-chinese" onclick="openReading('语文')">
+            📖 语文晨读
+            <span>点击进入专注阅读</span>
+        </div>
+        <div class="big-btn btn-english" onclick="alert('英语模块还在建设中，敬请期待哦！')">
+            🔤 英语复习
+            <span>敬请期待</span>
+        </div>
+        <button class="btn-logout" style="margin-top:20px; float:none; align-self:center;" onclick="logout()">退出登录</button>
+    </div>
+
+    <!-- 孩子端 - 专注阅读页 -->
+    <div id="readingScreen">
+        <div class="top-nav">
+            <button class="btn-back" onclick="backToHome()">← 返回主页</button>
+            <div class="progress-badge" id="readingProgress">0 / 0</div>
+        </div>
+        
+        <div class="focus-card">
+            <div class="focus-title" id="focusTitle">标题</div>
+            <div class="focus-content" id="focusContent">
+                <!-- 句子动态渲染到这里 -->
+            </div>
+            
+            <div class="status-text" id="statusText"></div>
+            <div class="bottom-action">
+                <button class="btn-record" id="btnRecord" onclick="toggleRecord()">
+                    🎤 开始录音跟读
+                </button>
+                <button class="btn-next" id="btnNext" onclick="nextTask()">
+                    ✓ 确认读完，下一篇 →
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://mubucjoyklpxoobgjyva.supabase.co';
@@ -122,17 +177,17 @@
 
         let userRole = localStorage.getItem('morning_role'); 
         let currentWeek = 1, currentDay = 1;
+        
+        // 孩子端阅读状态
+        let todayTasks = [];
+        let currentTaskIndex = 0;
 
-        // 语音引擎
         const synth = window.speechSynthesis;
         function speak(text) {
             synth.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-CN';
-            utterance.rate = 0.85; // 稍慢，适合孩子
-            const voices = synth.getVoices();
-            const targetVoice = voices.find(v => v.lang.includes('zh-CN'));
-            if (targetVoice) utterance.voice = targetVoice;
+            utterance.rate = 0.85; 
             synth.speak(utterance);
         }
 
@@ -159,47 +214,93 @@
 
         async function initApp() {
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainHeader').style.display = 'block';
-            document.getElementById('taskContainer').style.display = 'block';
-
+            
             const { data: setting } = await db.from('morning_settings').select('*').eq('id', 1).single();
             if (setting) {
                 currentWeek = setting.current_week;
                 currentDay = setting.current_day;
             }
-            
             let dayName = currentDay === 7 ? '第7天 (总复习)' : `第${currentDay}天`;
             document.getElementById('subtitle').innerText = `进度：第 ${currentWeek} 周 · ${dayName}`;
 
             if (userRole === 'parent') {
-                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('parentScreen').style.display = 'block';
                 document.getElementById('setWeek').value = currentWeek;
                 document.getElementById('setDay').value = currentDay;
-                document.getElementById('titleText').innerText = '👩‍🏫 家长模式';
-                document.getElementById('taskContainer').innerHTML = '<p style="text-align:center; color:#888; margin-top:50px;">家长端不展示课文，请用孩子密码登录查看。</p>';
+                loadEditList();
             } else {
-                document.getElementById('adminPanel').style.display = 'none';
-                document.getElementById('titleText').innerText = '🌞 每日早读';
-                loadTodayTasks();
+                document.getElementById('homeScreen').style.display = 'flex';
             }
         }
 
+        // ================= 家长端逻辑 =================
         async function saveSettings() {
             const w = parseInt(document.getElementById('setWeek').value);
             const d = parseInt(document.getElementById('setDay').value);
-            const btn = document.querySelector('.btn-save');
+            const btn = document.querySelector('.admin-panel .btn-save');
             btn.innerText = '保存中...';
 
             const { error } = await db.from('morning_settings').update({ current_week: w, current_day: d }).eq('id', 1);
-            if (error) {
-                alert('保存失败: ' + error.message);
-            } else {
+            if (error) alert('保存失败: ' + error.message);
+            else {
                 alert('进度已更新！');
-                location.reload(); // 刷新页面
+                location.reload(); 
             }
         }
 
-        async function loadTodayTasks() {
+        async function loadEditList() {
+            const w = parseInt(document.getElementById('setWeek').value);
+            const container = document.getElementById('editListContainer');
+            container.innerHTML = '加载中...';
+
+            const { data: tasks } = await db.from('morning_book').select('*').eq('week', w).order('day_index', { ascending: true });
+            if(!tasks || tasks.length === 0) {
+                container.innerHTML = '本周暂无数据';
+                return;
+            }
+
+            container.innerHTML = '';
+            tasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'edit-item';
+                div.innerHTML = `
+                    <div style="flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; margin-right:10px;">
+                        <strong>${task.day_index}.</strong> ${task.title}
+                    </div>
+                    <button class="btn-edit" onclick="editTask(${task.id}, '${task.title.replace(/'/g, "\\'")}', '${task.pinyin.replace(/'/g, "\\'")}', '${task.content.replace(/'/g, "\\'")}')">修改</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function editTask(id, title, pinyin, content) {
+            let newContent = prompt(`修改【${title}】的正文：\n(注意不要带拼音，只需汉字和标点)`, content);
+            if (newContent === null) return; // 取消
+            if (newContent.trim() === '') { alert('内容不能为空'); return; }
+            
+            let newPinyin = prompt(`修改【${title}】的拼音：\n(如果不改点取消)`, pinyin);
+            if (newPinyin === null) newPinyin = pinyin; 
+
+            const btn = event.target;
+            btn.innerText = '保存中';
+            
+            const { error } = await db.from('morning_book').update({ content: newContent, pinyin: newPinyin }).eq('id', id);
+            if(error) alert('修改失败: ' + error.message);
+            else { alert('修改成功！'); btn.innerText = '修改'; }
+        }
+
+        // ================= 孩子端逻辑 =================
+        function backToHome() {
+            document.getElementById('readingScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'flex';
+        }
+
+        async function openReading(subject) {
+            if (subject === '英语') return; // 暂未开放
+
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('readingScreen').style.display = 'flex';
+
             // 337排班逻辑：第N天读前(N+2)篇，第7天读全部9篇
             let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
 
@@ -209,122 +310,111 @@
                 .lte('day_index', maxIndex)
                 .order('day_index', { ascending: true });
 
-            if (error) {
-                document.getElementById('taskContainer').innerHTML = `<p style="color:red;">加载失败: ${error.message}</p>`;
+            if (error || !tasks) {
+                alert('加载课文失败，请检查网络');
+                backToHome();
                 return;
             }
-            if (!tasks || tasks.length === 0) {
-                document.getElementById('taskContainer').innerHTML = `<p style="text-align:center; color:#888;">这周没有内容哦，请家长检查数据或进度。</p>`;
+            if (tasks.length === 0) {
+                alert('本周暂无内容哦，请家长设置进度。');
+                backToHome();
                 return;
             }
 
-            const container = document.getElementById('taskContainer');
-            container.innerHTML = '';
-
-            // 获取今天已有的打卡记录
+            // 获取今天的打卡记录
             const today = getTodayDate();
             const { data: records } = await db.from('morning_records').select('*').eq('read_date', today);
             const recordMap = {};
             if(records) { records.forEach(r => recordMap[r.task_id] = r); }
 
-            tasks.forEach(task => {
-                // 计算今天每篇要读几遍
-                let targetCount = 1;
-                if (currentDay < 7) {
-                    // 如果是今天新学的、或提前预习的，读2遍
-                    if (task.day_index >= currentDay && task.day_index <= currentDay + 2) targetCount = 2;
-                } else {
-                    targetCount = 1; // 第7天全部复习1遍
-                }
-
-                const rec = recordMap[task.id];
-                const count = rec ? rec.read_count : 0;
-                const isDone = count >= targetCount;
-
-                // 按标点拆分句子和拼音
-                let sentences = task.content.match(/[^。！？；\n]+[。！？；]?/g) || [task.content];
-                let pinyins = task.pinyin ? (task.pinyin.match(/[^,，。.！？；\n]+[,，。.！？；]?/g) || [task.pinyin]) : [];
-
-                let linesHtml = '';
-                sentences.forEach((sentence, index) => {
-                    const cleanSentence = sentence.trim();
-                    if(!cleanSentence) return;
-                    const pinyinText = pinyins[index] ? pinyins[index].trim() : '';
-                    const safeId = `line-${task.id}-${index}`; // 用于绑定录音按钮
-
-                    linesHtml += `
-                    <div class="line" onclick="speak('${cleanSentence.replace(/'/g, "\\'")}')">
-                        ${pinyinText ? `<span class="pinyin">${pinyinText}</span>` : ''}
-                        <span>${cleanSentence}</span>
-                    </div>`;
-                });
-
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-title">
-                        <span>${task.day_index}. ${task.title}</span>
-                        <span style="font-size:12px; color:#666; background:#eee; padding:2px 8px; border-radius:10px;">需读 ${targetCount} 遍</span>
-                    </div>
-                    ${linesHtml}
-                    
-                    <!-- 录音交互区 -->
-                    <div class="status-text" id="status-${task.id}"></div>
-                    <div class="action-area">
-                        <button class="btn btn-record" id="btn-rec-${task.id}" onclick="toggleRecord(${task.id}, '${task.content.replace(/'/g, "\\'")}')">
-                            🎤 开始录音跟读
-                        </button>
-                        
-                        <button class="btn btn-done" id="btn-done-${task.id}" 
-                                style="${isDone ? 'background:#ccc;' : 'display:none;'}" 
-                                onclick="addCount(${task.id}, ${targetCount}, ${count}, ${rec ? rec.id : null})"
-                                ${isDone ? 'disabled' : ''}>
-                            ${isDone ? '已完成 ✓' : '✓ 确认打卡'}
-                        </button>
-                    </div>
-                    <div class="count-text" style="margin-top:10px; text-align:right;">今天已读：<strong id="count-${task.id}">${count}</strong> / ${targetCount} 遍</div>
-                `;
-                container.appendChild(card);
+            // 过滤出今天还没读满的篇目
+            todayTasks = tasks.filter(task => {
+                let target = (currentDay < 7 && task.day_index >= currentDay) ? 2 : 1;
+                let count = recordMap[task.id] ? recordMap[task.id].read_count : 0;
+                return count < target;
             });
+
+            if (todayTasks.length === 0) {
+                alert('🎉 太棒了！今天的阅读任务已经全部完成啦！');
+                backToHome();
+                return;
+            }
+
+            // 将打卡记录附加到任务上，方便调用
+            todayTasks.forEach(task => {
+                task._targetCount = (currentDay < 7 && task.day_index >= currentDay) ? 2 : 1;
+                task._currentCount = recordMap[task.id] ? recordMap[task.id].read_count : 0;
+                task._recordId = recordMap[task.id] ? recordMap[task.id].id : null;
+            });
+
+            currentTaskIndex = 0;
+            renderCurrentTask();
         }
 
-        // ================= 录音功能核心逻辑 =================
+        function renderCurrentTask() {
+            const task = todayTasks[currentTaskIndex];
+            
+            document.getElementById('readingProgress').innerText = `${currentTaskIndex + 1} / ${todayTasks.length}`;
+            document.getElementById('focusTitle').innerText = task.title;
+
+            // 拆分句子
+            let sentences = task.content.match(/[^。！？；\n]+[。！？；]?/g) || [task.content];
+            let pinyins = task.pinyin ? (task.pinyin.match(/[^,，。.！？；\n]+[,，。.！？；]?/g) || [task.pinyin]) : [];
+
+            let html = '';
+            sentences.forEach((sentence, index) => {
+                const clean = sentence.trim();
+                if(!clean) return;
+                const py = pinyins[index] ? pinyins[index].trim() : '';
+                html += `
+                <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}')">
+                    ${py ? `<div class="line-pinyin">${py}</div>` : ''}
+                    <div class="line-text">${clean}</div>
+                </div>`;
+            });
+            document.getElementById('focusContent').innerHTML = html;
+
+            // 重置底部按钮状态
+            const recBtn = document.getElementById('btnRecord');
+            const nextBtn = document.getElementById('btnNext');
+            const statusText = document.getElementById('statusText');
+            
+            recBtn.innerText = '🎤 开始录音跟读';
+            recBtn.classList.remove('recording');
+            recBtn.style.display = 'flex';
+            
+            nextBtn.style.display = 'none';
+            statusText.innerText = '';
+            isRecording = false;
+        }
+
+        // ================= 录音逻辑 =================
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
-        let currentRecordingTaskId = null;
 
-        async function toggleRecord(taskId, fullText) {
-            const btn = document.getElementById(`btn-rec-${taskId}`);
-            const statusText = document.getElementById(`status-${taskId}`);
-            const doneBtn = document.getElementById(`btn-done-${taskId}`);
+        async function toggleRecord() {
+            const btn = document.getElementById('btnRecord');
+            const statusText = document.getElementById('statusText');
+            const nextBtn = document.getElementById('btnNext');
 
             if (!isRecording) {
-                // 开始录音
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
-                    currentRecordingTaskId = taskId;
 
-                    mediaRecorder.ondataavailable = event => {
-                        audioChunks.push(event.data);
-                    };
-
+                    mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
-                        // 录音结束，生成音频并自动播放
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                         const audioUrl = URL.createObjectURL(audioBlob);
-                        const audio = new Audio(audioUrl);
-                        audio.play();
+                        new Audio(audioUrl).play(); // 自动播放录音
                         
-                        // 播放完录音后，显示打卡按钮
                         btn.innerText = '🎤 重新录音';
                         btn.classList.remove('recording');
-                        statusText.innerText = '🔊 正在播放你的录音，听听读得对吗？';
-                        doneBtn.style.display = 'block';
+                        statusText.innerText = '🔊 听听读得对吗？';
+                        nextBtn.style.display = 'block'; // 显示完成按钮
                         
-                        // 关闭麦克风释放资源
                         stream.getTracks().forEach(track => track.stop());
                     };
 
@@ -333,52 +423,52 @@
                     btn.innerText = '🛑 读完请点停止';
                     btn.classList.add('recording');
                     statusText.innerText = '正在录音...请大声朗读';
-                    doneBtn.style.display = 'none'; // 录音时隐藏打卡按钮
+                    nextBtn.style.display = 'none';
 
                 } catch (err) {
-                    alert('无法访问麦克风！请确保网页使用的是 https，并允许麦克风权限。');
-                    console.error(err);
+                    alert('无法访问麦克风！请确保使用了 https，且允许麦克风权限。');
                 }
             } else {
-                // 停止录音
                 mediaRecorder.stop();
                 isRecording = false;
                 statusText.innerText = '录音完成';
             }
         }
 
-        async function addCount(taskId, targetCount, currentCount, recordId) {
-            const newCount = currentCount + 1;
-            document.getElementById(`count-${taskId}`).innerText = newCount;
-            document.getElementById(`status-${taskId}`).innerText = '';
-
+        // 确认读完，进入下一篇
+        async function nextTask() {
+            const task = todayTasks[currentTaskIndex];
             const today = getTodayDate();
-            let error;
-            if (recordId) {
-                const res = await db.from('morning_records').update({ read_count: newCount }).eq('id', recordId);
-                error = res.error;
+            
+            // 更新数据库
+            const newCount = task._currentCount + 1;
+            if (task._recordId) {
+                await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
             } else {
-                const res = await db.from('morning_records').insert([{ task_id: taskId, read_count: newCount, read_date: today }]);
-                error = res.error;
+                await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
             }
 
-            if (error) {
-                alert('网络不好，打卡未同步：' + error.message);
-                return;
+            // 如果这篇还没读够遍数（比如需要读2遍）
+            if (newCount < task._targetCount) {
+                task._currentCount = newCount;
+                task._recordId = task._recordId; // 保持不变
+                // 提示继续读
+                document.getElementById('statusText').innerText = `读完啦！这篇还需读 ${task._targetCount - newCount} 遍哦，请再录一次音。`;
+                document.getElementById('btnRecord').innerText = '🎤 再读一遍';
+                document.getElementById('btnNext').style.display = 'none';
+                return; // 留在当前页面
             }
 
-            if (newCount >= targetCount) {
+            // 如果这篇已经彻底达标，去下一篇
+            currentTaskIndex++;
+            if (currentTaskIndex >= todayTasks.length) {
+                // 所有任务完成
                 if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                const doneBtn = document.getElementById(`btn-done-${taskId}`);
-                doneBtn.innerText = "已完成 ✓";
-                doneBtn.style.background = "#ccc";
-                doneBtn.disabled = true;
-                document.getElementById(`btn-rec-${taskId}`).style.display = 'none'; // 读完了就隐藏录音按钮
+                alert('🎉 太棒了！今天的语文晨读任务全部完成！');
+                backToHome();
             } else {
-                // 还没读完，按钮重置回录音状态
-                const recBtn = document.getElementById(`btn-rec-${taskId}`);
-                recBtn.innerText = '🎤 再读一遍';
-                document.getElementById(`btn-done-${taskId}`).style.display = 'none';
+                // 渲染下一篇
+                renderCurrentTask();
             }
         }
 
