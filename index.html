@@ -214,21 +214,44 @@
         let currentSubject = '语文'; 
 
         const synth = window.speechSynthesis;
+                // 替换后的发音函数：语文用系统中文，英语用有道真人发音
+        let currentAudio = null; // 用来存当前播放的音频，防止重叠
+
         function speak(text, lang = 'zh-CN') {
-            synth.cancel();
+            // 先停掉上一个正在读的
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+            if (lang === 'en-US') {
+                // 🎯 英语：调用有道词典真人发音接口 (type=2 是美音)
+                // 对文本做 encodeURIComponent，防止特殊符号出错
+                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(text)}&type=2`;
+                
+                currentAudio = new Audio(audioUrl);
+                // 有道发音不支持直接调速，但真人录音的语速本身就很适合跟读
+                currentAudio.play().catch(err => {
+                    console.warn('有道发音失败，降级到系统发音', err);
+                    // 如果网络不好或接口挂了，降级用系统发音，保证能用
+                    fallbackSpeak(text, lang);
+                });
+            } else {
+                // 语文：继续用系统中文发音
+                fallbackSpeak(text, lang);
+            }
+        }
+
+        // 系统发音的备用函数（从你原来的 speak 里摘出来的）
+        function fallbackSpeak(text, lang) {
+            const synth = window.speechSynthesis;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            // 语速：英语 0.5 极慢，语文 0.75
-            utterance.rate = (lang === 'en-US') ? 0.5 : 0.75; 
+            utterance.rate = (lang === 'en-US') ? 0.7 : 0.75;
             
             const voices = synth.getVoices();
-            let targetVoice;
-            if (lang === 'en-US') {
-                targetVoice = voices.find(v => v.lang.includes('en-US') && (v.name.includes('Samantha') || v.name.includes('Natural') || v.name.includes('Google')));
-                if (!targetVoice) targetVoice = voices.find(v => v.lang.includes('en-US')); 
-            } else {
-                targetVoice = voices.find(v => v.lang.includes('zh-CN'));
-            }
+            const targetVoice = voices.find(v => v.lang.includes(lang));
             if (targetVoice) utterance.voice = targetVoice;
             synth.speak(utterance);
         }
