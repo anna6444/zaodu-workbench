@@ -17,7 +17,7 @@
             display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
         }
         
-        /* 登录 & 家长端 */
+        /* 登录 & 家长端 (保持原样) */
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .login-box { background: var(--card); padding: 30px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 320px; text-align: center; }
         .login-box h2 { margin-top: 0; color: var(--primary); }
@@ -32,6 +32,7 @@
         .btn-save { background: var(--orange); }
         .btn-logout { background: var(--danger); float: right; padding: 6px 12px; font-size: 14px;}
         .btn-blue { background: var(--blue); width: 100%; margin-bottom: 10px;}
+        
         .edit-list { max-height: 350px; overflow-y: auto; background: #fff; border-radius: 8px; padding: 10px;}
         .edit-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;}
         .btn-edit { background: var(--blue); padding: 6px 12px; font-size: 14px;}
@@ -70,7 +71,7 @@
         .progress-badge { background: #e0f2f1; color: #00695c; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;}
         .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
         .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; }
-        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow-y: auto;}
         .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px;}
         .line-block:active { background-color: var(--highlight); }
         .line-pinyin { font-size: 16px; color: var(--subtext); margin-bottom: 8px; letter-spacing: 1px;}
@@ -83,22 +84,25 @@
         .status-text { font-size: 14px; color: var(--orange); font-weight: bold; text-align: center; height: 20px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-        /* =========== 英语专属 UI =========== */
-        .english-header { text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 15px; margin-bottom: 15px;}
-        .english-letter-box { font-size: 80px; font-weight: 900; color: #E53935; line-height: 1; cursor: pointer; display: inline-block; padding: 10px 40px; border: 4px solid #64B5F6; border-radius: 16px; background: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        .english-letter-box:active { background: #e3f2fd; }
+        /* =========== 英语专属 UI (全新句子版) =========== */
+        .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
         
-        .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 15px; }
-        
-        .word-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
-        .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 8px 16px; font-size: 24px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;}
+        /* 句子区 */
+        .en-sentence-box { background: #f9fbe7; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #e6ee9c;}
+        .en-line { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; display: flex; flex-direction: column;}
+        .en-line:active { color: #8BC34A; }
+        .en-trans { font-size: 14px; color: #888; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; }
+        .en-trans:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        /* 单词区 */
+        .word-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 6px 14px; font-size: 20px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 5px;}
         .word-card:active { transform: scale(0.95); background: #FFECB3; }
-        .word-card span.emoji { font-size: 30px; }
         
-        .phonics-list { display: flex; flex-direction: column; gap: 10px; }
-        .phonics-item { background: #f5f5f5; border-radius: 12px; padding: 10px 15px; font-size: 22px; font-weight: bold; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: space-between;}
-        .phonics-item:active { background: #e0e0e0; }
-        .phonics-item .highlight-letter { color: #E53935; font-size: 26px; font-weight: 900; margin-right: 10px;}
+        /* 拼读区 */
+        .phonics-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .phonics-item { background: #e3f2fd; border-radius: 8px; padding: 8px 15px; font-size: 18px; font-weight: bold; color: #1565C0; cursor: pointer;}
+        .phonics-item:active { background: #bbdefb; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -170,7 +174,7 @@
         </div>
         <div class="big-btn btn-english" onclick="openReading('英语')">
             🔤 英语复习
-            <span>Phonics & Words</span>
+            <span>Sentences & Phonics</span>
         </div>
         <button class="btn btn-logout" style="margin-top:20px; float:none; align-self:center; background:#999;" onclick="logout()">退出登录</button>
     </div>
@@ -209,27 +213,22 @@
         let editingTaskId = null;
         let currentSubject = '语文'; 
 
-        // ================= 语音引擎（超级优化版） =================
         const synth = window.speechSynthesis;
         function speak(text, lang = 'zh-CN') {
-            synth.cancel(); // 打断当前正在读的
+            synth.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            
-            // 🎯 语速调整：英语设置极慢速 0.5，语文稍微快一点点 0.75
+            // 语速：英语 0.5 极慢，语文 0.75
             utterance.rate = (lang === 'en-US') ? 0.5 : 0.75; 
             
             const voices = synth.getVoices();
             let targetVoice;
             if (lang === 'en-US') {
-                // 优先寻找苹果设备上最自然的真人语音包(Samantha)或安卓的 Google 语音
                 targetVoice = voices.find(v => v.lang.includes('en-US') && (v.name.includes('Samantha') || v.name.includes('Natural') || v.name.includes('Google')));
                 if (!targetVoice) targetVoice = voices.find(v => v.lang.includes('en-US')); 
             } else {
-                // 语文找中文发音
                 targetVoice = voices.find(v => v.lang.includes('zh-CN'));
             }
-            
             if (targetVoice) utterance.voice = targetVoice;
             synth.speak(utterance);
         }
@@ -362,8 +361,12 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
-                const { data: engTasks } = await db.from('morning_english').select('*').limit(1);
-                if (!engTasks || engTasks.length === 0) { alert('英语题库为空，请先导入'); backToHome(); return; }
+                // 读取当前的英语Day（借用语文的currentDay来作为Day 1, Day 2...）
+                const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+                if (!engTasks || engTasks.length === 0) { 
+                    alert(`英语 Day ${currentDay} 暂无内容，请家长导入。`); 
+                    backToHome(); return; 
+                }
                 todayTasks = engTasks;
                 currentTaskIndex = 0;
                 renderEnglishTask();
@@ -389,43 +392,43 @@
             resetBottomButtons();
         }
 
-        // --- 渲染英语 (教材风格) ---
+        // --- 渲染英语 (句子版) ---
         function renderEnglishTask() {
             const task = todayTasks[currentTaskIndex];
-            document.getElementById('readingProgress').innerText = `1 / 1`;
+            document.getElementById('readingProgress').innerText = `Day ${task.day_index}`;
             document.getElementById('focusTitle').innerText = task.unit_title;
 
+            // 按 | 拆分句子和翻译
+            const sentenceList = task.sentences.split('|').map(s => s.trim());
+            const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
             const wordsArray = task.words.split(',').map(w => w.trim());
             const phonicsArray = task.phonics.split(',').map(p => p.trim());
 
             let html = `
-                <div class="english-header">
-                    <!-- 🎯 修复发音：点击大写字母时，只读 A，不读 A a 避免出现双音重复 -->
-                    <div class="english-letter-box" onclick="speak('A', 'en-US')">${task.main_letter}</div>
+                <div style="text-align:center;"><span class="english-section-title">🎵 课文跟读</span></div>
+                <div class="en-sentence-box">
+                    ${sentenceList.map((s, i) => `
+                        <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US')">${s}</div>
+                        <div class="en-trans">${transList[i] || ''}</div>
+                    `).join('')}
                 </div>
-                
-                <div style="text-align:center;"><span class="english-section-title">Point and Say</span></div>
+
+                <div style="text-align:center;"><span class="english-section-title">💡 重点单词</span></div>
                 <div class="word-grid">
                     ${wordsArray.map(w => {
                         const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
                         const emoji = w.replace(/[a-zA-Z\s]/g, "").trim();
                         return `<div class="word-card" onclick="speak('${pureWord}', 'en-US')">
-                            <span>${pureWord}</span>
-                            ${emoji ? `<span class="emoji">${emoji}</span>` : ''}
+                            <span>${pureWord}</span><span class="emoji">${emoji}</span>
                         </div>`;
                     }).join('')}
                 </div>
 
-                <div style="text-align:center;"><span class="english-section-title">Play with Sounds</span></div>
+                <div style="text-align:center;"><span class="english-section-title">🔤 拼读练习</span></div>
                 <div class="phonics-list">
-                    ${phonicsArray.map(p => {
-                        // 🎯 把 a-a-a 替换成 a, a, a，配合 0.5 慢速，会有极好的停顿感
-                        const speakText = p.replace(/-/g, ', ');
-                        return `<div class="phonics-item" onclick="speak('${speakText}', 'en-US')">
-                            <span><span class="highlight-letter">${p.charAt(0)}</span> ${p}</span>
-                            <span style="color:#2196F3; font-size:16px;">🔊 点读</span>
-                        </div>`;
-                    }).join('')}
+                    ${phonicsArray.map(p => `
+                        <div class="phonics-item" onclick="speak('${p}', 'en-US')">${p} 🔊</div>
+                    `).join('')}
                 </div>
             `;
             document.getElementById('focusContent').innerHTML = html;
