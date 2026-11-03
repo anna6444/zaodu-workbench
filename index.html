@@ -15,9 +15,12 @@
             background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.6;
             -webkit-user-select: none; user-select: none;
             display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
+            /* 🎯 关键修复：防止双击放大屏幕 */
+            touch-action: manipulation; 
+            -webkit-tap-highlight-color: transparent; /* 去除点击时的蓝色框 */
         }
         
-        /* 登录 & 家长端 (保持原样) */
+        /* 登录 & 家长端 */
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .login-box { background: var(--card); padding: 30px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 320px; text-align: center; }
         .login-box h2 { margin-top: 0; color: var(--primary); }
@@ -72,6 +75,7 @@
         .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
         .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; }
         .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow-y: auto;}
+        
         .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px;}
         .line-block:active { background-color: var(--highlight); }
         .line-pinyin { font-size: 16px; color: var(--subtext); margin-bottom: 8px; letter-spacing: 1px;}
@@ -84,22 +88,19 @@
         .status-text { font-size: 14px; color: var(--orange); font-weight: bold; text-align: center; height: 20px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
-        /* =========== 英语专属 UI (全新句子版) =========== */
+        /* =========== 英语专属 UI =========== */
         .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
         
-        /* 句子区 */
         .en-sentence-box { background: #f9fbe7; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #e6ee9c;}
         .en-line { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; display: flex; flex-direction: column;}
         .en-line:active { color: #8BC34A; }
         .en-trans { font-size: 14px; color: #888; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; }
         .en-trans:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
-        /* 单词区 */
         .word-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 6px 14px; font-size: 20px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 5px;}
         .word-card:active { transform: scale(0.95); background: #FFECB3; }
         
-        /* 拼读区 */
         .phonics-list { display: flex; flex-wrap: wrap; gap: 10px; }
         .phonics-item { background: #e3f2fd; border-radius: 8px; padding: 8px 15px; font-size: 18px; font-weight: bold; color: #1565C0; cursor: pointer;}
         .phonics-item:active { background: #bbdefb; }
@@ -213,43 +214,37 @@
         let editingTaskId = null;
         let currentSubject = '语文'; 
 
-        const synth = window.speechSynthesis;
-                // 替换后的发音函数：语文用系统中文，英语用有道真人发音
-        let currentAudio = null; // 用来存当前播放的音频，防止重叠
+        // ================= 🎯 超级发音引擎 =================
+        let globalAudio = new Audio(); // 全局播放器，防止苹果拦截
 
-        function speak(text, lang = 'zh-CN') {
-            // 先停掉上一个正在读的
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-            }
+        function speak(text, lang = 'zh-CN', event) {
+            // 阻止双击放大
+            if (event) event.preventDefault(); 
+
+            // 停止上一次的声音
+            globalAudio.pause();
+            globalAudio.currentTime = 0;
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                // 🎯 英语：调用有道词典真人发音接口 (type=2 是美音)
-                // 对文本做 encodeURIComponent，防止特殊符号出错
+                // 英语：调用有道真人发音
                 const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(text)}&type=2`;
-                
-                currentAudio = new Audio(audioUrl);
-                // 有道发音不支持直接调速，但真人录音的语速本身就很适合跟读
-                currentAudio.play().catch(err => {
-                    console.warn('有道发音失败，降级到系统发音', err);
-                    // 如果网络不好或接口挂了，降级用系统发音，保证能用
+                globalAudio.src = audioUrl;
+                globalAudio.play().catch(err => {
+                    console.log('有道发音失败，降级系统发音', err);
                     fallbackSpeak(text, lang);
                 });
             } else {
-                // 语文：继续用系统中文发音
+                // 语文：继续用系统发音
                 fallbackSpeak(text, lang);
             }
         }
 
-        // 系统发音的备用函数（从你原来的 speak 里摘出来的）
         function fallbackSpeak(text, lang) {
             const synth = window.speechSynthesis;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
             utterance.rate = (lang === 'en-US') ? 0.7 : 0.75;
-            
             const voices = synth.getVoices();
             const targetVoice = voices.find(v => v.lang.includes(lang));
             if (targetVoice) utterance.voice = targetVoice;
@@ -384,7 +379,6 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
-                // 读取当前的英语Day（借用语文的currentDay来作为Day 1, Day 2...）
                 const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
                 if (!engTasks || engTasks.length === 0) { 
                     alert(`英语 Day ${currentDay} 暂无内容，请家长导入。`); 
@@ -409,19 +403,19 @@
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
                 const py = pinyins[index] ? pinyins[index].trim() : '';
-                html += `<div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN')">${py ? `<div class="line-pinyin">${py}</div>` : ''}<div class="line-text">${clean}</div></div>`;
+                // 🎯 加上 event
+                html += `<div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">${py ? `<div class="line-pinyin">${py}</div>` : ''}<div class="line-text">${clean}</div></div>`;
             });
             document.getElementById('focusContent').innerHTML = html;
             resetBottomButtons();
         }
 
-        // --- 渲染英语 (句子版) ---
+        // --- 渲染英语 ---
         function renderEnglishTask() {
             const task = todayTasks[currentTaskIndex];
             document.getElementById('readingProgress').innerText = `Day ${task.day_index}`;
             document.getElementById('focusTitle').innerText = task.unit_title;
 
-            // 按 | 拆分句子和翻译
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
             const wordsArray = task.words.split(',').map(w => w.trim());
@@ -431,7 +425,8 @@
                 <div style="text-align:center;"><span class="english-section-title">🎵 课文跟读</span></div>
                 <div class="en-sentence-box">
                     ${sentenceList.map((s, i) => `
-                        <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US')">${s}</div>
+                        <!-- 🎯 加上 event -->
+                        <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
                         <div class="en-trans">${transList[i] || ''}</div>
                     `).join('')}
                 </div>
@@ -441,7 +436,8 @@
                     ${wordsArray.map(w => {
                         const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
                         const emoji = w.replace(/[a-zA-Z\s]/g, "").trim();
-                        return `<div class="word-card" onclick="speak('${pureWord}', 'en-US')">
+                        // 🎯 加上 event
+                        return `<div class="word-card" onclick="speak('${pureWord}', 'en-US', event)">
                             <span>${pureWord}</span><span class="emoji">${emoji}</span>
                         </div>`;
                     }).join('')}
@@ -449,8 +445,9 @@
 
                 <div style="text-align:center;"><span class="english-section-title">🔤 拼读练习</span></div>
                 <div class="phonics-list">
+                    <!-- 🎯 加上 event -->
                     ${phonicsArray.map(p => `
-                        <div class="phonics-item" onclick="speak('${p}', 'en-US')">${p} 🔊</div>
+                        <div class="phonics-item" onclick="speak('${p}', 'en-US', event)">${p} 🔊</div>
                     `).join('')}
                 </div>
             `;
