@@ -15,9 +15,8 @@
             background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.6;
             -webkit-user-select: none; user-select: none;
             display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
-            /* 🎯 关键修复：防止双击放大屏幕 */
             touch-action: manipulation; 
-            -webkit-tap-highlight-color: transparent; /* 去除点击时的蓝色框 */
+            -webkit-tap-highlight-color: transparent; 
         }
         
         /* 登录 & 家长端 */
@@ -74,10 +73,15 @@
         .progress-badge { background: #e0f2f1; color: #00695c; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;}
         .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
         .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; }
-        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow-y: auto;}
         
-        .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px;}
+        /* 🎯 增加 Min-height 避免闪烁时的跳动 */
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px;}
+        
+        .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px; transition: all 0.1s;}
         .line-block:active { background-color: var(--highlight); }
+        /* 🎯 点击反馈特效 */
+        .clicking { transform: scale(0.98); opacity: 0.6; } 
+        
         .line-pinyin { font-size: 16px; color: var(--subtext); margin-bottom: 8px; letter-spacing: 1px;}
         .line-text { font-size: 28px; font-weight: 500; line-height: 1.4; }
         
@@ -85,24 +89,28 @@
         .btn-record { background: var(--orange); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer;}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
         .btn-next { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: none; cursor: pointer; }
-        .status-text { font-size: 14px; color: var(--orange); font-weight: bold; text-align: center; height: 20px;}
+        
+        /* 🎯 改成按钮样式 */
+        .status-text { font-size: 16px; font-weight: bold; text-align: center; padding: 10px; border-radius: 8px; background: #fff3e0; color: var(--orange); border: 1px solid var(--orange); display: none; cursor: pointer;}
+        .status-text:active { background: #ffe0b2; }
+
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
 
         /* =========== 英语专属 UI =========== */
         .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
         
         .en-sentence-box { background: #f9fbe7; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #e6ee9c;}
-        .en-line { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; display: flex; flex-direction: column;}
+        .en-line { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; display: flex; flex-direction: column; transition: all 0.1s;}
         .en-line:active { color: #8BC34A; }
         .en-trans { font-size: 14px; color: #888; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ddd; }
         .en-trans:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 
         .word-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-        .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 6px 14px; font-size: 20px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 5px;}
+        .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 6px 14px; font-size: 20px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.1s;}
         .word-card:active { transform: scale(0.95); background: #FFECB3; }
         
         .phonics-list { display: flex; flex-wrap: wrap; gap: 10px; }
-        .phonics-item { background: #e3f2fd; border-radius: 8px; padding: 8px 15px; font-size: 18px; font-weight: bold; color: #1565C0; cursor: pointer;}
+        .phonics-item { background: #e3f2fd; border-radius: 8px; padding: 8px 15px; font-size: 18px; font-weight: bold; color: #1565C0; cursor: pointer; transition: all 0.1s;}
         .phonics-item:active { background: #bbdefb; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -187,10 +195,12 @@
         </div>
         
         <div class="focus-card">
-            <div class="focus-title" id="focusTitle">标题</div>
+            <div class="focus-title" id="focusTitle">加载中...</div>
             <div class="focus-content" id="focusContent"></div>
             
-            <div class="status-text" id="statusText"></div>
+            <!-- 🎯 变成一个重听录音按钮 -->
+            <div class="status-text" id="statusText" onclick="playLastRecord()">🔊 点我重听录音</div>
+            
             <div class="bottom-action">
                 <button class="btn-record" id="btnRecord" onclick="toggleRecord()">
                     🎤 开始录音跟读
@@ -214,28 +224,27 @@
         let editingTaskId = null;
         let currentSubject = '语文'; 
 
-        // ================= 🎯 超级发音引擎 =================
-        let globalAudio = new Audio(); // 全局播放器，防止苹果拦截
+        // ================= 🎯 全新发音引擎 =================
+        let globalAudio = new Audio(); 
 
         function speak(text, lang = 'zh-CN', event) {
-            // 阻止双击放大
-            if (event) event.preventDefault(); 
+            if (event) {
+                event.preventDefault(); 
+                // 🎯 点击特效：变透明缩小，告诉孩子点到了
+                const el = event.currentTarget;
+                el.classList.add('clicking');
+                setTimeout(() => el.classList.remove('clicking'), 300);
+            }
 
-            // 停止上一次的声音
             globalAudio.pause();
             globalAudio.currentTime = 0;
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                // 英语：调用有道真人发音
                 const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(text)}&type=2`;
                 globalAudio.src = audioUrl;
-                globalAudio.play().catch(err => {
-                    console.log('有道发音失败，降级系统发音', err);
-                    fallbackSpeak(text, lang);
-                });
+                globalAudio.play().catch(err => fallbackSpeak(text, lang));
             } else {
-                // 语文：继续用系统发音
                 fallbackSpeak(text, lang);
             }
         }
@@ -350,10 +359,18 @@
             document.getElementById('homeScreen').style.display = 'flex';
         }
 
+        // 🎯 修复切换闪烁：加入清空机制
         async function openReading(subject) {
             currentSubject = subject;
             document.getElementById('homeScreen').style.display = 'none';
             document.getElementById('readingScreen').style.display = 'flex';
+            
+            // 立即清空屏幕，显示加载提示
+            document.getElementById('focusTitle').innerText = '加载中...';
+            document.getElementById('focusContent').innerHTML = '<div style="text-align:center; color:#999; margin-top:50px;">正在准备今日任务...</div>';
+            document.getElementById('statusText').style.display = 'none';
+            document.getElementById('btnRecord').style.display = 'none';
+            document.getElementById('btnNext').style.display = 'none';
 
             if (subject === '语文') {
                 let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
@@ -403,7 +420,6 @@
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
                 const py = pinyins[index] ? pinyins[index].trim() : '';
-                // 🎯 加上 event
                 html += `<div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">${py ? `<div class="line-pinyin">${py}</div>` : ''}<div class="line-text">${clean}</div></div>`;
             });
             document.getElementById('focusContent').innerHTML = html;
@@ -425,7 +441,6 @@
                 <div style="text-align:center;"><span class="english-section-title">🎵 课文跟读</span></div>
                 <div class="en-sentence-box">
                     ${sentenceList.map((s, i) => `
-                        <!-- 🎯 加上 event -->
                         <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
                         <div class="en-trans">${transList[i] || ''}</div>
                     `).join('')}
@@ -436,7 +451,6 @@
                     ${wordsArray.map(w => {
                         const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
                         const emoji = w.replace(/[a-zA-Z\s]/g, "").trim();
-                        // 🎯 加上 event
                         return `<div class="word-card" onclick="speak('${pureWord}', 'en-US', event)">
                             <span>${pureWord}</span><span class="emoji">${emoji}</span>
                         </div>`;
@@ -445,7 +459,6 @@
 
                 <div style="text-align:center;"><span class="english-section-title">🔤 拼读练习</span></div>
                 <div class="phonics-list">
-                    <!-- 🎯 加上 event -->
                     ${phonicsArray.map(p => `
                         <div class="phonics-item" onclick="speak('${p}', 'en-US', event)">${p} 🔊</div>
                     `).join('')}
@@ -459,16 +472,23 @@
             const recBtn = document.getElementById('btnRecord');
             const nextBtn = document.getElementById('btnNext');
             const statusText = document.getElementById('statusText');
+            
             recBtn.innerText = '🎤 开始录音跟读';
             recBtn.classList.remove('recording');
             recBtn.style.display = 'flex';
+            
             nextBtn.style.display = 'none';
-            statusText.innerText = '';
+            statusText.style.display = 'none';
             isRecording = false;
         }
 
         // --- 录音功能 ---
         let mediaRecorder, audioChunks = [], isRecording = false;
+        let lastRecordedAudio = null; // 🎯 保存刚刚录音的音频
+
+        function playLastRecord() {
+            if (lastRecordedAudio) lastRecordedAudio.play();
+        }
 
         async function toggleRecord() {
             const btn = document.getElementById('btnRecord');
@@ -483,10 +503,14 @@
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        new Audio(URL.createObjectURL(audioBlob)).play(); 
+                        lastRecordedAudio = new Audio(URL.createObjectURL(audioBlob));
+                        lastRecordedAudio.play(); // 自动播放一次
+                        
                         btn.innerText = '🎤 重新录音';
                         btn.classList.remove('recording');
-                        statusText.innerText = '🔊 听听读得对吗？';
+                        
+                        statusText.innerText = '🔊 点我重听录音';
+                        statusText.style.display = 'block'; // 显示重听按钮
                         nextBtn.style.display = 'block';
                         stream.getTracks().forEach(track => track.stop());
                     };
@@ -494,13 +518,12 @@
                     isRecording = true;
                     btn.innerText = '🛑 读完请点停止';
                     btn.classList.add('recording');
-                    statusText.innerText = '正在录音...请大声朗读';
+                    statusText.style.display = 'none';
                     nextBtn.style.display = 'none';
                 } catch (err) { alert('无法访问麦克风！'); }
             } else {
                 mediaRecorder.stop();
                 isRecording = false;
-                statusText.innerText = '录音完成';
             }
         }
 
@@ -515,7 +538,8 @@
 
                 if (newCount < task._targetCount) {
                     task._currentCount = newCount;
-                    document.getElementById('statusText').innerText = `这篇还需读 ${task._targetCount - newCount} 遍哦。`;
+                    document.getElementById('statusText').innerText = `这篇还需读 ${task._targetCount - newCount} 遍哦，请再录一次。`;
+                    document.getElementById('statusText').style.display = 'block';
                     document.getElementById('btnRecord').innerText = '🎤 再读一遍';
                     document.getElementById('btnNext').style.display = 'none';
                     return;
