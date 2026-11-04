@@ -74,12 +74,10 @@
         .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
         .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; }
         
-        /* 🎯 增加 Min-height 避免闪烁时的跳动 */
         .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px;}
         
         .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px; transition: all 0.1s;}
         .line-block:active { background-color: var(--highlight); }
-        /* 🎯 点击反馈特效 */
         .clicking { transform: scale(0.98); opacity: 0.6; } 
         
         .line-pinyin { font-size: 16px; color: var(--subtext); margin-bottom: 8px; letter-spacing: 1px;}
@@ -90,8 +88,7 @@
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
         .btn-next { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 18px; font-weight: bold; display: none; cursor: pointer; }
         
-        /* 🎯 改成按钮样式 */
-        .status-text { font-size: 16px; font-weight: bold; text-align: center; padding: 10px; border-radius: 8px; background: #fff3e0; color: var(--orange); border: 1px solid var(--orange); display: none; cursor: pointer;}
+        .status-text { font-size: 16px; font-weight: bold; text-align: center; padding: 10px; border-radius: 8px; background: #fff3e0; color: var(--orange); border: 1px solid var(--orange); display: none; cursor: pointer; transition: all 0.2s;}
         .status-text:active { background: #ffe0b2; }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
@@ -99,6 +96,10 @@
         /* =========== 英语专属 UI =========== */
         .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
         
+        /* 🎯 新增：全文连读按钮 */
+        .btn-play-all { width: 100%; padding: 12px; background: #FF9800; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-play-all:active { background: #F57C00; }
+
         .en-sentence-box { background: #f9fbe7; border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid #e6ee9c;}
         .en-line { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; display: flex; flex-direction: column; transition: all 0.1s;}
         .en-line:active { color: #8BC34A; }
@@ -198,7 +199,7 @@
             <div class="focus-title" id="focusTitle">加载中...</div>
             <div class="focus-content" id="focusContent"></div>
             
-            <!-- 🎯 变成一个重听录音按钮 -->
+            <!-- 🎯 点我重听录音 -->
             <div class="status-text" id="statusText" onclick="playLastRecord()">🔊 点我重听录音</div>
             
             <div class="bottom-action">
@@ -224,13 +225,12 @@
         let editingTaskId = null;
         let currentSubject = '语文'; 
 
-        // ================= 🎯 全新发音引擎 =================
+        // ================= 🎯 超级发音引擎 =================
         let globalAudio = new Audio(); 
 
         function speak(text, lang = 'zh-CN', event) {
             if (event) {
                 event.preventDefault(); 
-                // 🎯 点击特效：变透明缩小，告诉孩子点到了
                 const el = event.currentTarget;
                 el.classList.add('clicking');
                 setTimeout(() => el.classList.remove('clicking'), 300);
@@ -241,7 +241,9 @@
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(text)}&type=2`;
+                // 清理不需要的标点，保证发音一致
+                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
+                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
                 globalAudio.src = audioUrl;
                 globalAudio.play().catch(err => fallbackSpeak(text, lang));
             } else {
@@ -359,13 +361,11 @@
             document.getElementById('homeScreen').style.display = 'flex';
         }
 
-        // 🎯 修复切换闪烁：加入清空机制
         async function openReading(subject) {
             currentSubject = subject;
             document.getElementById('homeScreen').style.display = 'none';
             document.getElementById('readingScreen').style.display = 'flex';
             
-            // 立即清空屏幕，显示加载提示
             document.getElementById('focusTitle').innerText = '加载中...';
             document.getElementById('focusContent').innerHTML = '<div style="text-align:center; color:#999; margin-top:50px;">正在准备今日任务...</div>';
             document.getElementById('statusText').style.display = 'none';
@@ -437,8 +437,17 @@
             const wordsArray = task.words.split(',').map(w => w.trim());
             const phonicsArray = task.phonics.split(',').map(p => p.trim());
 
+            // 把所有句子拼起来，作为全文连读的文本
+            const fullText = sentenceList.join('. ');
+
             let html = `
                 <div style="text-align:center;"><span class="english-section-title">🎵 课文跟读</span></div>
+                
+                <!-- 🎯 全文连读按钮 -->
+                <button class="btn-play-all" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">
+                    ▶️ 播放全文朗读
+                </button>
+
                 <div class="en-sentence-box">
                     ${sentenceList.map((s, i) => `
                         <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
@@ -484,10 +493,20 @@
 
         // --- 录音功能 ---
         let mediaRecorder, audioChunks = [], isRecording = false;
-        let lastRecordedAudio = null; // 🎯 保存刚刚录音的音频
+        let recordedUrl = ''; // 🎯 存录音的URL
 
+        // 🎯 修复：重听录音的最优解（每次点击都重新加载音频）
         function playLastRecord() {
-            if (lastRecordedAudio) lastRecordedAudio.play();
+            if (recordedUrl) {
+                // 创建一个全新的 Audio 对象，确保 100% 能播出声音
+                const tempAudio = new Audio(recordedUrl);
+                tempAudio.play().catch(e => console.log('播放录音失败', e));
+                
+                // 视觉反馈
+                const statusText = document.getElementById('statusText');
+                statusText.innerText = '🔊 正在播放...';
+                setTimeout(() => { statusText.innerText = '🔊 点我重听录音'; }, 1500);
+            }
         }
 
         async function toggleRecord() {
@@ -503,14 +522,17 @@
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        lastRecordedAudio = new Audio(URL.createObjectURL(audioBlob));
-                        lastRecordedAudio.play(); // 自动播放一次
+                        recordedUrl = URL.createObjectURL(audioBlob); // 保存链接
+                        
+                        // 自动播放一次
+                        const tempAudio = new Audio(recordedUrl);
+                        tempAudio.play();
                         
                         btn.innerText = '🎤 重新录音';
                         btn.classList.remove('recording');
                         
                         statusText.innerText = '🔊 点我重听录音';
-                        statusText.style.display = 'block'; // 显示重听按钮
+                        statusText.style.display = 'block'; 
                         nextBtn.style.display = 'block';
                         stream.getTracks().forEach(track => track.stop());
                     };
