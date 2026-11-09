@@ -8,15 +8,14 @@
         :root {
             --primary: #4CAF50; --blue: #2196F3; --bg: #f0f7f4; --card: #ffffff;
             --text: #333333; --subtext: #666666; --highlight: #e8f5e9;
-            --danger: #f44336; --orange: #FF9800;
+            --danger: #f44336; --orange: #FF9800; --purple: #9C27B0;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; line-height: 1.6;
             -webkit-user-select: none; user-select: none;
             display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
-            touch-action: manipulation; 
-            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent; 
         }
         
         /* 登录 & 家长端 */
@@ -45,6 +44,14 @@
         .history-table th, .history-table td { border: 1px solid #ddd; padding: 8px; }
         .history-table th { background: #f0f8ff; color: #1565C0; }
 
+        /* 插播新课文表单 */
+        .extra-form input, .extra-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 14px; box-sizing: border-box;}
+        .extra-form textarea { resize: vertical; height: 60px; }
+        .btn-extra { background: #FF9800; width: 100%; padding: 12px; font-size: 16px; margin-top: 5px;}
+        .setting-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .setting-row div { flex: 1; background: #fff; padding: 5px 10px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px;}
+        .setting-row input { width: 40px; padding: 2px; border: 1px solid #ccc; border-radius: 4px; text-align: center;}
+
         #editModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: flex-end; }
         .modal-content { background: #fff; width: 100%; height: 90%; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -59,11 +66,12 @@
         .btn-confirm { background: var(--primary); }
 
         /* 孩子端主页 */
-        #homeScreen { display: none; flex-direction: column; gap: 20px; justify-content: center; height: 80vh; }
-        .big-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 40%; border-radius: 24px; color: white; font-size: 32px; font-weight: bold; box-shadow: 0 8px 16px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; }
+        #homeScreen { display: none; flex-direction: column; gap: 15px; justify-content: center; height: 80vh; }
+        .big-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 30%; border-radius: 24px; color: white; font-size: 32px; font-weight: bold; box-shadow: 0 8px 16px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; }
         .big-btn:active { transform: scale(0.98); }
         .btn-chinese { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
         .btn-english { background: linear-gradient(135deg, #2196F3, #1565C0); }
+        .btn-loop { background: linear-gradient(135deg, #9C27B0, #6A1B9A); height: 20%; font-size: 24px;}
         .big-btn span { font-size: 16px; font-weight: normal; margin-top: 10px; opacity: 0.9;}
 
         /* 孩子端 - 专注阅读页 */
@@ -74,7 +82,7 @@
         .focus-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; flex: 1; }
         .focus-title { font-size: 22px; font-weight: bold; color: var(--primary); text-align: center; margin-bottom: 20px; }
         
-        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px;}
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px; overflow-y: auto;}
         
         .line-block { text-align: center; cursor: pointer; padding: 10px; border-radius: 8px; margin-bottom: 10px; transition: all 0.1s;}
         .line-block:active { background-color: var(--highlight); }
@@ -96,7 +104,6 @@
         /* =========== 英语专属 UI =========== */
         .english-section-title { font-size: 16px; font-weight: bold; color: #fff; background: #8BC34A; display: inline-block; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
         
-        /* 🎯 新增：全文连读按钮 */
         .btn-play-all { width: 100%; padding: 12px; background: #FF9800; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-play-all:active { background: #F57C00; }
 
@@ -113,6 +120,16 @@
         .phonics-list { display: flex; flex-wrap: wrap; gap: 10px; }
         .phonics-item { background: #e3f2fd; border-radius: 8px; padding: 8px 15px; font-size: 18px; font-weight: bold; color: #1565C0; cursor: pointer; transition: all 0.1s;}
         .phonics-item:active { background: #bbdefb; }
+
+        /* 加餐UI */
+        .extra-box { background: #fce4ec; border: 2px dashed #E91E63; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .extra-title { color: #C2185B; font-size: 18px; font-weight: bold; margin-bottom: 10px; text-align: center;}
+
+        /* 循环播放UI */
+        #loopScreen { display: none; flex-direction: column; justify-content: center; align-items: center; height: 80vh; text-align: center;}
+        .loop-icon { font-size: 80px; animation: pulse 2s infinite; margin-bottom: 20px;}
+        .loop-text { font-size: 20px; color: var(--subtext); margin-bottom: 30px; height: 30px;}
+        .btn-stop-loop { background: var(--danger); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -151,14 +168,33 @@
             <button class="btn btn-logout" onclick="logout()">退出</button>
             <h3>👩‍🏫 家长控制台</h3>
             <div class="admin-row">
-                <span>进度：第</span>
+                <span>语文进度：第</span>
                 <input type="number" id="setWeek" value="1">
                 <span>周，第</span>
                 <input type="number" id="setDay" value="1">
                 <span>天</span>
-                <button class="btn btn-save" onclick="saveSettings()">手动修改进度</button>
+                <button class="btn btn-save" onclick="saveSettings()">修改</button>
             </div>
         </div>
+
+        <!-- 🎯 英语智能加餐 -->
+        <div class="admin-panel extra-form" style="background:#fce4ec; border-color:#E91E63;">
+            <h3 style="color:#C2185B;">🚀 插入新英语课文（智能复习）</h3>
+            
+            <div class="setting-row">
+                <div>连续学 <input type="number" id="exDays" value="3"> 天</div>
+                <div>第 <input type="number" id="exRev1" value="7"> 天复习</div>
+                <div>第 <input type="number" id="exRev2" value="15"> 天复习</div>
+            </div>
+
+            <input type="text" id="exTitle" placeholder="标题 (如: Unit 2 新课文)">
+            <textarea id="exSentences" placeholder="英文句子 (用 | 隔开) 如: Hello! | How are you?"></textarea>
+            <textarea id="exTrans" placeholder="中文翻译 (用 | 隔开) 如: 你好！ | 你好吗？"></textarea>
+            <input type="text" id="exWords" placeholder="重点单词 (逗号隔开) 如: hello 👋, you 👦">
+            <input type="text" id="exPhonics" placeholder="拼读练习 (逗号隔开) 如: he, she, we">
+            <button class="btn btn-extra" onclick="addExtraTask()">一键排入课程表</button>
+        </div>
+
         <div class="admin-panel history-panel">
             <h3>📊 孩子打卡记录</h3>
             <table class="history-table" id="historyTable">
@@ -180,13 +216,15 @@
         </div>
         <div class="big-btn btn-chinese" onclick="openReading('语文')">
             📖 语文晨读
-            <span>点击进入专注阅读</span>
         </div>
         <div class="big-btn btn-english" onclick="openReading('英语')">
             🔤 英语复习
-            <span>Sentences & Phonics</span>
         </div>
-        <button class="btn btn-logout" style="margin-top:20px; float:none; align-self:center; background:#999;" onclick="logout()">退出登录</button>
+        <div class="big-btn btn-loop" onclick="startLoopMode()">
+            🎧 循环磨耳朵
+            <span>自动连读今日全部内容</span>
+        </div>
+        <button class="btn btn-logout" style="margin-top:15px; float:none; align-self:center; background:#999;" onclick="logout()">退出登录</button>
     </div>
 
     <div id="readingScreen">
@@ -199,7 +237,6 @@
             <div class="focus-title" id="focusTitle">加载中...</div>
             <div class="focus-content" id="focusContent"></div>
             
-            <!-- 🎯 点我重听录音 -->
             <div class="status-text" id="statusText" onclick="playLastRecord()">🔊 点我重听录音</div>
             
             <div class="bottom-action">
@@ -213,6 +250,13 @@
         </div>
     </div>
 
+    <!-- 🎧 循环播放模式界面 -->
+    <div id="loopScreen">
+        <div class="loop-icon">🎧</div>
+        <div class="loop-text" id="loopStatus">准备开始...</div>
+        <button class="btn-stop-loop" onclick="stopLoopMode()">🛑 停止播放并返回</button>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://mubucjoyklpxoobgjyva.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11YnVjam95a2xweG9vYmdqeXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2Mzc4MDMsImV4cCI6MjEwMzIxMzgwM30.YfnUWqXIcnGY99Qbvz3vDIPnFf9ECC9M0dbM40cCr8k';
@@ -224,10 +268,10 @@
         let currentTaskIndex = 0;
         let editingTaskId = null;
         let currentSubject = '语文'; 
+        let currentExtraTasks = []; // 🎯 可能有多篇加餐
 
-        // ================= 🎯 超级发音引擎 =================
+        // ================= 🎯 全新发音引擎 =================
         let globalAudio = new Audio(); 
-
         function speak(text, lang = 'zh-CN', event) {
             if (event) {
                 event.preventDefault(); 
@@ -235,13 +279,11 @@
                 el.classList.add('clicking');
                 setTimeout(() => el.classList.remove('clicking'), 300);
             }
-
             globalAudio.pause();
             globalAudio.currentTime = 0;
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                // 清理不需要的标点，保证发音一致
                 let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
                 const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
                 globalAudio.src = audioUrl;
@@ -262,8 +304,14 @@
             synth.speak(utterance);
         }
 
+        // 日期助手
         function getTodayDate() {
             const d = new Date();
+            return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+        function getFutureDate(days) {
+            const d = new Date();
+            d.setDate(d.getDate() + days);
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
 
@@ -296,7 +344,51 @@
             }
         }
 
-        // --- 家长端逻辑 ---
+        // --- 🎯 家长端：智能计算复习日期 ---
+        async function addExtraTask() {
+            const title = document.getElementById('exTitle').value;
+            const sentences = document.getElementById('exSentences').value;
+            const trans = document.getElementById('exTrans').value;
+            const words = document.getElementById('exWords').value;
+            const phonics = document.getElementById('exPhonics').value;
+            
+            const days = parseInt(document.getElementById('exDays').value) || 3;
+            const rev1 = parseInt(document.getElementById('exRev1').value) || 7;
+            const rev2 = parseInt(document.getElementById('exRev2').value) || 15;
+
+            if(!title || !sentences) { alert('标题和句子不能为空'); return; }
+
+            // 智能计算日期：今天往后连续days天，加上第rev1天，第rev2天
+            let datesArray = [];
+            for(let i = 0; i < days; i++) datesArray.push(getFutureDate(i));
+            if(rev1 > days) datesArray.push(getFutureDate(rev1 - 1));
+            if(rev2 > rev1) datesArray.push(getFutureDate(rev2 - 1));
+            
+            // 去重并排序
+            datesArray = [...new Set(datesArray)].sort();
+            const study_dates = datesArray.join(',');
+
+            const btn = document.querySelector('.btn-extra');
+            btn.innerText = '正在排课...';
+
+            const { error } = await db.from('morning_english_extra').insert([{
+                unit_title: title, sentences, translation: trans, words, phonics, study_dates
+            }]);
+
+            if(error) {
+                alert('保存失败: ' + error.message);
+            } else {
+                alert(`排课成功！\n这堂课将会出现在以下日期：\n${datesArray.join('\n')}`);
+                document.getElementById('exTitle').value = '';
+                document.getElementById('exSentences').value = '';
+                document.getElementById('exTrans').value = '';
+                document.getElementById('exWords').value = '';
+                document.getElementById('exPhonics').value = '';
+            }
+            btn.innerText = '一键排入课程表';
+        }
+
+        // --- 家长端其他逻辑 ---
         async function saveSettings() {
             const w = parseInt(document.getElementById('setWeek').value);
             const d = parseInt(document.getElementById('setDay').value);
@@ -373,6 +465,7 @@
             document.getElementById('btnNext').style.display = 'none';
 
             if (subject === '语文') {
+                currentExtraTasks = [];
                 let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
                 const { data: tasks } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
                 if (!tasks || tasks.length === 0) { alert('本周暂无语文内容'); backToHome(); return; }
@@ -396,12 +489,24 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
+                // 🎯 查今天有没有英语加餐 (使用 LIKE 进行模糊匹配日期)
+                const today = getTodayDate();
+                const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+                currentExtraTasks = exTasks || [];
+
+                // 常规任务
                 const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+                
                 if (!engTasks || engTasks.length === 0) { 
-                    alert(`英语 Day ${currentDay} 暂无内容，请家长导入。`); 
-                    backToHome(); return; 
+                    if (currentExtraTasks.length === 0) {
+                        alert(`英语 Day ${currentDay} 暂无内容，请家长导入。`); 
+                        backToHome(); return;
+                    } else {
+                        todayTasks = [];
+                    }
+                } else {
+                    todayTasks = engTasks;
                 }
-                todayTasks = engTasks;
                 currentTaskIndex = 0;
                 renderEnglishTask();
             }
@@ -426,36 +531,54 @@
             resetBottomButtons();
         }
 
-        // --- 渲染英语 ---
+        // --- 渲染英语 (含多篇加餐) ---
         function renderEnglishTask() {
-            const task = todayTasks[currentTaskIndex];
-            document.getElementById('readingProgress').innerText = `Day ${task.day_index}`;
-            document.getElementById('focusTitle').innerText = task.unit_title;
+            let html = '';
+            if (todayTasks.length > 0) {
+                const task = todayTasks[currentTaskIndex];
+                document.getElementById('readingProgress').innerText = `Day ${task.day_index}`;
+                document.getElementById('focusTitle').innerText = task.unit_title;
 
+                html += generateEnglishHtml(task, false);
+            }
+
+            // 附加所有加餐任务
+            currentExtraTasks.forEach((ex, idx) => {
+                html += `
+                    <div class="extra-box">
+                        <div class="extra-title">✨ 今日强化/复习：${ex.unit_title}</div>
+                        ${generateEnglishHtml(ex, true)}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('focusContent').innerHTML = html;
+            resetBottomButtons();
+        }
+
+        // 提取一个复用函数生成英语界面
+        function generateEnglishHtml(task, isExtra) {
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
-            const wordsArray = task.words.split(',').map(w => w.trim());
-            const phonicsArray = task.phonics.split(',').map(p => p.trim());
-
-            // 把所有句子拼起来，作为全文连读的文本
+            const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : [];
+            const phonicsArray = task.phonics ? task.phonics.split(',').map(p => p.trim()) : [];
             const fullText = sentenceList.join('. ');
+            const btnColor = isExtra ? '#E91E63' : '#FF9800';
+            const titleColor = isExtra ? '#E91E63' : '#8BC34A';
 
-            let html = `
-                <div style="text-align:center;"><span class="english-section-title">🎵 课文跟读</span></div>
-                
-                <!-- 🎯 全文连读按钮 -->
-                <button class="btn-play-all" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">
-                    ▶️ 播放全文朗读
-                </button>
-
+            let res = `
+                <button class="btn-play-all" style="background:${btnColor};" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>
                 <div class="en-sentence-box">
                     ${sentenceList.map((s, i) => `
                         <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
                         <div class="en-trans">${transList[i] || ''}</div>
                     `).join('')}
                 </div>
+            `;
 
-                <div style="text-align:center;"><span class="english-section-title">💡 重点单词</span></div>
+            if(wordsArray.length > 0) {
+                res += `
+                <div style="text-align:center;"><span class="english-section-title" style="background:${titleColor};">💡 重点单词</span></div>
                 <div class="word-grid">
                     ${wordsArray.map(w => {
                         const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
@@ -464,17 +587,19 @@
                             <span>${pureWord}</span><span class="emoji">${emoji}</span>
                         </div>`;
                     }).join('')}
-                </div>
+                </div>`;
+            }
 
-                <div style="text-align:center;"><span class="english-section-title">🔤 拼读练习</span></div>
+            if(phonicsArray.length > 0) {
+                res += `
+                <div style="text-align:center;"><span class="english-section-title" style="background:${titleColor};">🔤 拼读练习</span></div>
                 <div class="phonics-list">
                     ${phonicsArray.map(p => `
                         <div class="phonics-item" onclick="speak('${p}', 'en-US', event)">${p} 🔊</div>
                     `).join('')}
-                </div>
-            `;
-            document.getElementById('focusContent').innerHTML = html;
-            resetBottomButtons();
+                </div>`;
+            }
+            return res;
         }
 
         function resetBottomButtons() {
@@ -493,16 +618,12 @@
 
         // --- 录音功能 ---
         let mediaRecorder, audioChunks = [], isRecording = false;
-        let recordedUrl = ''; // 🎯 存录音的URL
+        let recordedUrl = '';
 
-        // 🎯 修复：重听录音的最优解（每次点击都重新加载音频）
         function playLastRecord() {
             if (recordedUrl) {
-                // 创建一个全新的 Audio 对象，确保 100% 能播出声音
                 const tempAudio = new Audio(recordedUrl);
                 tempAudio.play().catch(e => console.log('播放录音失败', e));
-                
-                // 视觉反馈
                 const statusText = document.getElementById('statusText');
                 statusText.innerText = '🔊 正在播放...';
                 setTimeout(() => { statusText.innerText = '🔊 点我重听录音'; }, 1500);
@@ -522,15 +643,11 @@
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        recordedUrl = URL.createObjectURL(audioBlob); // 保存链接
-                        
-                        // 自动播放一次
-                        const tempAudio = new Audio(recordedUrl);
-                        tempAudio.play();
+                        recordedUrl = URL.createObjectURL(audioBlob); 
+                        new Audio(recordedUrl).play();
                         
                         btn.innerText = '🎤 重新录音';
                         btn.classList.remove('recording');
-                        
                         statusText.innerText = '🔊 点我重听录音';
                         statusText.style.display = 'block'; 
                         nextBtn.style.display = 'block';
@@ -549,7 +666,6 @@
             }
         }
 
-        // --- 下一步逻辑 ---
         async function nextTask() {
             if (currentSubject === '语文') {
                 const task = todayTasks[currentTaskIndex];
@@ -575,7 +691,6 @@
             }
         }
 
-        // --- 自动推进进度 ---
         async function advanceProgress() {
             let newWeek = currentWeek;
             let newDay = currentDay + 1;
@@ -583,6 +698,111 @@
             await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
             alert(`🎉 太棒了！任务已全部完成！\n系统已自动为您解锁：第 ${newWeek} 周 · 第 ${newDay} 天\n请刷新页面开始新任务！`);
             location.reload();
+        }
+
+        // ================= 🎧 循环播放模式 =================
+        let loopQueue = [];
+        let isLooping = false;
+
+        async function startLoopMode() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('loopScreen').style.display = 'flex';
+            document.getElementById('loopStatus').innerText = '正在整理今日内容...';
+            
+            loopQueue = [];
+            const today = getTodayDate();
+
+            // 1. 收集语文 (只收集今天该读的)
+            let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
+            const { data: zhTasks } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
+            if (zhTasks) {
+                zhTasks.forEach(t => {
+                    let sentences = t.content.match(/[^。！？；\n]+[。！？；]?/g) || [t.content];
+                    sentences.forEach(s => loopQueue.push({ text: s.trim(), lang: 'zh-CN' }));
+                });
+            }
+
+            // 2. 收集英语常规
+            const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+            if (engTasks && engTasks.length > 0) {
+                const sents = engTasks[0].sentences.split('|').map(s=>s.trim());
+                sents.forEach(s => loopQueue.push({ text: s, lang: 'en-US' }));
+            }
+
+            // 3. 收集英语加餐
+            const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+            if (exTasks) {
+                exTasks.forEach(t => {
+                    const sents = t.sentences.split('|').map(s=>s.trim());
+                    sents.forEach(s => loopQueue.push({ text: s, lang: 'en-US' }));
+                });
+            }
+
+            if (loopQueue.length === 0) {
+                alert('今日没有需要循环播放的内容。');
+                stopLoopMode();
+                return;
+            }
+
+            isLooping = true;
+            playLoopQueue();
+        }
+
+        function playLoopQueue() {
+            if (!isLooping) return;
+            
+            let index = 0;
+            function playNext() {
+                if (!isLooping) return;
+                if (index >= loopQueue.length) {
+                    // 播放完毕一轮，休息3秒后重头开始
+                    document.getElementById('loopStatus').innerText = '一轮播放完毕，3秒后重新开始...';
+                    setTimeout(() => {
+                        if(isLooping) {
+                            index = 0;
+                            playNext();
+                        }
+                    }, 3000);
+                    return;
+                }
+
+                const item = loopQueue[index];
+                document.getElementById('loopStatus').innerText = item.text;
+
+                if (item.lang === 'en-US') {
+                    let cleanText = item.text.replace(/[.,!?;:'"]/g, '').trim();
+                    const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                    globalAudio.src = audioUrl;
+                    globalAudio.onended = () => { 
+                        index++; 
+                        setTimeout(playNext, 800); // 句间停顿0.8秒
+                    };
+                    globalAudio.play().catch(() => {
+                        // 如果英语挂了，直接播下一句
+                        index++; playNext();
+                    });
+                } else {
+                    // 语文用 TTS
+                    const synth = window.speechSynthesis;
+                    const utterance = new SpeechSynthesisUtterance(item.text);
+                    utterance.lang = 'zh-CN';
+                    utterance.rate = 0.75;
+                    utterance.onend = () => { 
+                        index++; 
+                        setTimeout(playNext, 800); 
+                    };
+                    synth.speak(utterance);
+                }
+            }
+            playNext();
+        }
+
+        function stopLoopMode() {
+            isLooping = false;
+            globalAudio.pause();
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            document.getElementById('loopScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'flex';
         }
 
         window.onload = () => {
