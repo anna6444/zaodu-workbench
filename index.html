@@ -71,7 +71,7 @@
         .big-btn:active { transform: scale(0.98); }
         .btn-chinese { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
         .btn-english { background: linear-gradient(135deg, #2196F3, #1565C0); }
-        .btn-loop { background: linear-gradient(135deg, #9C27B0, #6A1B9A); height: 20%; font-size: 24px;}
+        .btn-loop { background: linear-gradient(135deg, #212121, #000000); height: 20%; font-size: 24px;}
         .big-btn span { font-size: 16px; font-weight: normal; margin-top: 10px; opacity: 0.9;}
 
         /* 孩子端 - 专注阅读页 */
@@ -125,11 +125,12 @@
         .extra-box { background: #fce4ec; border: 2px dashed #E91E63; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
         .extra-title { color: #C2185B; font-size: 18px; font-weight: bold; margin-bottom: 10px; text-align: center;}
 
-        /* 循环播放UI */
-        #loopScreen { display: none; flex-direction: column; justify-content: center; align-items: center; height: 80vh; text-align: center;}
-        .loop-icon { font-size: 80px; animation: pulse 2s infinite; margin-bottom: 20px;}
-        .loop-text { font-size: 20px; color: var(--subtext); margin-bottom: 30px; height: 30px;}
-        .btn-stop-loop { background: var(--danger); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);}
+        /* 循环播放UI (黑屏模式) */
+        #loopScreen { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #000; color: #333; text-align: center; position: fixed; top:0; left:0; width:100%; z-index: 1001;}
+        .loop-icon { font-size: 60px; color: #111; margin-bottom: 20px;}
+        .loop-text { font-size: 18px; color: #222; margin-bottom: 50px; height: 30px; padding: 0 20px; line-height: 1.5;}
+        .btn-stop-loop { background: #222; color: #555; border: none; padding: 15px 40px; border-radius: 30px; font-size: 16px; font-weight: bold; cursor: pointer;}
+        .btn-stop-loop:active { background: #444; color: #fff;}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -177,16 +178,13 @@
             </div>
         </div>
 
-        <!-- 🎯 英语智能加餐 -->
         <div class="admin-panel extra-form" style="background:#fce4ec; border-color:#E91E63;">
             <h3 style="color:#C2185B;">🚀 插入新英语课文（智能复习）</h3>
-            
             <div class="setting-row">
                 <div>连续学 <input type="number" id="exDays" value="3"> 天</div>
                 <div>第 <input type="number" id="exRev1" value="7"> 天复习</div>
                 <div>第 <input type="number" id="exRev2" value="15"> 天复习</div>
             </div>
-
             <input type="text" id="exTitle" placeholder="标题 (如: Unit 2 新课文)">
             <textarea id="exSentences" placeholder="英文句子 (用 | 隔开) 如: Hello! | How are you?"></textarea>
             <textarea id="exTrans" placeholder="中文翻译 (用 | 隔开) 如: 你好！ | 你好吗？"></textarea>
@@ -222,7 +220,7 @@
         </div>
         <div class="big-btn btn-loop" onclick="startLoopMode()">
             🎧 循环磨耳朵
-            <span>自动连读今日全部内容</span>
+            <span>仅播放英语，像听歌一样</span>
         </div>
         <button class="btn btn-logout" style="margin-top:15px; float:none; align-self:center; background:#999;" onclick="logout()">退出登录</button>
     </div>
@@ -250,11 +248,11 @@
         </div>
     </div>
 
-    <!-- 🎧 循环播放模式界面 -->
+    <!-- 🎧 循环播放模式界面 (黑屏风格) -->
     <div id="loopScreen">
         <div class="loop-icon">🎧</div>
-        <div class="loop-text" id="loopStatus">准备开始...</div>
-        <button class="btn-stop-loop" onclick="stopLoopMode()">🛑 停止播放并返回</button>
+        <div class="loop-text" id="loopStatus">正在准备英语音频...</div>
+        <button class="btn-stop-loop" onclick="stopLoopMode()">🛑 退出磨耳朵</button>
     </div>
 
     <script>
@@ -268,7 +266,7 @@
         let currentTaskIndex = 0;
         let editingTaskId = null;
         let currentSubject = '语文'; 
-        let currentExtraTasks = []; // 🎯 可能有多篇加餐
+        let currentExtraTasks = [];
 
         // ================= 🎯 全新发音引擎 =================
         let globalAudio = new Audio(); 
@@ -304,7 +302,6 @@
             synth.speak(utterance);
         }
 
-        // 日期助手
         function getTodayDate() {
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
@@ -358,13 +355,11 @@
 
             if(!title || !sentences) { alert('标题和句子不能为空'); return; }
 
-            // 智能计算日期：今天往后连续days天，加上第rev1天，第rev2天
             let datesArray = [];
             for(let i = 0; i < days; i++) datesArray.push(getFutureDate(i));
             if(rev1 > days) datesArray.push(getFutureDate(rev1 - 1));
             if(rev2 > rev1) datesArray.push(getFutureDate(rev2 - 1));
             
-            // 去重并排序
             datesArray = [...new Set(datesArray)].sort();
             const study_dates = datesArray.join(',');
 
@@ -489,12 +484,10 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
-                // 🎯 查今天有没有英语加餐 (使用 LIKE 进行模糊匹配日期)
                 const today = getTodayDate();
                 const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
                 currentExtraTasks = exTasks || [];
 
-                // 常规任务
                 const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
                 
                 if (!engTasks || engTasks.length === 0) { 
@@ -542,7 +535,6 @@
                 html += generateEnglishHtml(task, false);
             }
 
-            // 附加所有加餐任务
             currentExtraTasks.forEach((ex, idx) => {
                 html += `
                     <div class="extra-box">
@@ -556,7 +548,6 @@
             resetBottomButtons();
         }
 
-        // 提取一个复用函数生成英语界面
         function generateEnglishHtml(task, isExtra) {
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
@@ -618,11 +609,12 @@
 
         // --- 录音功能 ---
         let mediaRecorder, audioChunks = [], isRecording = false;
-        let recordedUrl = '';
+        let recordedBlob = null; // 🎯 修复：直接存 Blob
 
+        // 🎯 修复重听没声音：通过重新绑定 Blob 播放
         function playLastRecord() {
-            if (recordedUrl) {
-                const tempAudio = new Audio(recordedUrl);
+            if (recordedBlob) {
+                const tempAudio = new Audio(URL.createObjectURL(recordedBlob));
                 tempAudio.play().catch(e => console.log('播放录音失败', e));
                 const statusText = document.getElementById('statusText');
                 statusText.innerText = '🔊 正在播放...';
@@ -642,9 +634,8 @@
                     audioChunks = [];
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                        recordedUrl = URL.createObjectURL(audioBlob); 
-                        new Audio(recordedUrl).play();
+                        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' }); // 🎯 保存 Blob
+                        new Audio(URL.createObjectURL(recordedBlob)).play(); // 自动播放
                         
                         btn.innerText = '🎤 重新录音';
                         btn.classList.remove('recording');
@@ -700,46 +691,36 @@
             location.reload();
         }
 
-        // ================= 🎧 循环播放模式 =================
+        // ================= 🎧 黑屏英语循环播放 =================
         let loopQueue = [];
         let isLooping = false;
 
         async function startLoopMode() {
             document.getElementById('homeScreen').style.display = 'none';
             document.getElementById('loopScreen').style.display = 'flex';
-            document.getElementById('loopStatus').innerText = '正在整理今日内容...';
+            document.getElementById('loopStatus').innerText = '正在获取英语内容...';
             
             loopQueue = [];
             const today = getTodayDate();
 
-            // 1. 收集语文 (只收集今天该读的)
-            let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
-            const { data: zhTasks } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
-            if (zhTasks) {
-                zhTasks.forEach(t => {
-                    let sentences = t.content.match(/[^。！？；\n]+[。！？；]?/g) || [t.content];
-                    sentences.forEach(s => loopQueue.push({ text: s.trim(), lang: 'zh-CN' }));
-                });
-            }
-
-            // 2. 收集英语常规
+            // 1. 收集英语常规 (将整篇连成一段)
             const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
             if (engTasks && engTasks.length > 0) {
                 const sents = engTasks[0].sentences.split('|').map(s=>s.trim());
-                sents.forEach(s => loopQueue.push({ text: s, lang: 'en-US' }));
+                loopQueue.push(sents.join('. '));
             }
 
-            // 3. 收集英语加餐
+            // 2. 收集英语加餐
             const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
             if (exTasks) {
                 exTasks.forEach(t => {
                     const sents = t.sentences.split('|').map(s=>s.trim());
-                    sents.forEach(s => loopQueue.push({ text: s, lang: 'en-US' }));
+                    loopQueue.push(sents.join('. '));
                 });
             }
 
             if (loopQueue.length === 0) {
-                alert('今日没有需要循环播放的内容。');
+                alert('今日没有英语内容哦。');
                 stopLoopMode();
                 return;
             }
@@ -766,33 +747,19 @@
                     return;
                 }
 
-                const item = loopQueue[index];
-                document.getElementById('loopStatus').innerText = item.text;
+                const fullText = loopQueue[index];
+                document.getElementById('loopStatus').innerText = fullText;
 
-                if (item.lang === 'en-US') {
-                    let cleanText = item.text.replace(/[.,!?;:'"]/g, '').trim();
-                    const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
-                    globalAudio.src = audioUrl;
-                    globalAudio.onended = () => { 
-                        index++; 
-                        setTimeout(playNext, 800); // 句间停顿0.8秒
-                    };
-                    globalAudio.play().catch(() => {
-                        // 如果英语挂了，直接播下一句
-                        index++; playNext();
-                    });
-                } else {
-                    // 语文用 TTS
-                    const synth = window.speechSynthesis;
-                    const utterance = new SpeechSynthesisUtterance(item.text);
-                    utterance.lang = 'zh-CN';
-                    utterance.rate = 0.75;
-                    utterance.onend = () => { 
-                        index++; 
-                        setTimeout(playNext, 800); 
-                    };
-                    synth.speak(utterance);
-                }
+                let cleanText = fullText.replace(/[.,!?;:'"]/g, '').trim();
+                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                globalAudio.src = audioUrl;
+                globalAudio.onended = () => { 
+                    index++; 
+                    setTimeout(playNext, 1500); // 篇文章之间停顿1.5秒
+                };
+                globalAudio.play().catch(() => {
+                    index++; playNext();
+                });
             }
             playNext();
         }
@@ -800,7 +767,6 @@
         function stopLoopMode() {
             isLooping = false;
             globalAudio.pause();
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
             document.getElementById('loopScreen').style.display = 'none';
             document.getElementById('homeScreen').style.display = 'flex';
         }
