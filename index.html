@@ -75,7 +75,6 @@
         .focus-card { background: var(--card); border-radius: 32px; padding: 30px 20px; box-shadow: 0 12px 32px rgba(244,143,177,0.1); display: flex; flex-direction: column; flex: 1; position: relative;}
         .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 20px; padding-bottom: 15px;}
         
-        /* 🎯 重点修改：改为居中垂直排列 */
         .focus-content { 
             flex: 1; 
             display: flex; 
@@ -87,7 +86,6 @@
             padding: 10px;
         }
 
-        /* 调整文本块样式，去除灰底，更干净 */
         .line-block { 
             text-align: center; 
             cursor: pointer; 
@@ -108,6 +106,7 @@
         .status-text { font-size: 20px; font-weight: bold; text-align: center; padding: 12px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; margin-bottom: 15px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
+        /* 英语排版 */
         .en-line { font-size: 38px; font-weight: bold; color: #333; margin-bottom: 10px; cursor: pointer; text-align: center; padding: 15px; border-radius: 16px;}
         .en-line:active { background-color: var(--pink-light); }
         .en-trans { font-size: 20px; color: #888; margin-bottom: 20px; text-align: center;}
@@ -233,14 +232,16 @@
         const CACHE_KEY_ZH = 'cache_zh_tasks';
         const CACHE_KEY_EN = 'cache_en_tasks';
 
+        // 🎯 修复1：在 speak 里兼容 event 传参，同时清理英文中的标点
         let globalAudio = new Audio(); 
         function speak(text, lang = 'zh-CN', event) {
-            if (event) event.preventDefault(); 
+            if (event) event.preventDefault(); // 防止点击穿透放大
             globalAudio.pause();
             globalAudio.currentTime = 0;
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
+                // 只去掉标点，保留空格！否则单词连在一起就读不出了
                 let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
                 const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
                 globalAudio.src = audioUrl;
@@ -450,14 +451,13 @@
             document.getElementById('progressText').innerText = percent + '%';
         }
 
-        // 🎯 渲染语文 (居中排版)
+        // 渲染语文 (居中排版)
         function renderChineseTask() {
             if(currentTaskIndex >= todayTasks.length) return;
             const task = todayTasks[currentTaskIndex];
             document.getElementById('focusTitle').innerText = task.title;
             updateProgressBar();
 
-            // 按照标点符号彻底断句
             let sentences = task.content.split(/(?<=[。！？；])/g).filter(s => s.trim().length > 0);
             let pinyins = task.pinyin ? task.pinyin.split(/(?<=[.?!;])/g).filter(s => s.trim().length > 0) : [];
 
@@ -465,6 +465,7 @@
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
                 const py = pinyins[index] ? pinyins[index].trim() : '';
+                // 🎯 修复：传了 event
                 html += `
                 <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
                     ${py ? `<div class="line-pinyin">${py}</div>` : ''}
@@ -500,9 +501,11 @@
             const fullText = sentenceList.join('. ');
 
             let res = `<div style="width:100%;">`;
+            // 🎯 修复：传了 event
             res += `<button class="btn-record" style="width:100%; background:#81D4FA; margin-bottom:20px;" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>`;
             
             sentenceList.forEach((s, i) => {
+                // 🎯 修复：传了 event
                 res += `
                     <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
                     <div class="en-trans">${transList[i] || ''}</div>
@@ -687,6 +690,59 @@
             await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
             alert(`🎉 太棒了！任务全部完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
             location.reload();
+        }
+
+        // ================= 🎧 循环磨耳朵 =================
+        let loopQueue = [];
+        let isLooping = false;
+
+        async function startLoopMode() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('loopScreen').style.display = 'flex';
+            document.getElementById('loopStatus').innerText = '正在准备音频...';
+            
+            loopQueue = [];
+            const today = getTodayDate();
+
+            const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+            if (engTasks && engTasks.length > 0) {
+                loopQueue.push(engTasks[0].sentences.replace(/\|/g, '. '));
+            }
+            const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+            if (exTasks) {
+                exTasks.forEach(t => { loopQueue.push(t.sentences.replace(/\|/g, '. ')); });
+            }
+
+            if (loopQueue.length === 0) { alert('暂无英语内容'); stopLoopMode(); return; }
+            isLooping = true;
+            playLoopQueue();
+        }
+
+        function playLoopQueue() {
+            if (!isLooping) return;
+            let index = 0;
+            function playNext() {
+                if (!isLooping) return;
+                if (index >= loopQueue.length) {
+                    document.getElementById('loopStatus').innerText = '一轮完毕，3秒后重播...';
+                    setTimeout(() => { if(isLooping) { index = 0; playNext(); } }, 3000);
+                    return;
+                }
+                const text = loopQueue[index];
+                document.getElementById('loopStatus').innerText = text;
+                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
+                globalAudio.src = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                globalAudio.onended = () => { index++; setTimeout(playNext, 1500); };
+                globalAudio.play().catch(() => { index++; playNext(); });
+            }
+            playNext();
+        }
+
+        function stopLoopMode() {
+            isLooping = false;
+            globalAudio.pause();
+            document.getElementById('loopScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'flex';
         }
 
         window.onload = () => {
