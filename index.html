@@ -5,33 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>🌸 晨读小花园</title>
     <style>
-        /* 核心配色：粉嫩马卡龙 */
         :root {
-            --bg: #FFF0F5;          /* 浅樱花粉背景 */
-            --card: #FFFFFF;        /* 纯白卡片 */
-            --pink-dark: #F48FB1;   /* 深粉，用于标题和边框 */
-            --pink-light: #FCE4EC;  /* 浅粉，用于按钮和点击反馈 */
-            --text: #4A4A4A;        /* 深灰色字体，比纯黑柔和 */
-            --subtext: #9E9E9E;     /* 浅灰，用于拼音 */
-            --blue: #81D4FA;        /* 点缀的浅蓝 */
-            --green: #A5D6A7;       /* 点缀的浅绿 */
+            --bg: #FFF0F5; --card: #FFFFFF; --pink-dark: #F48FB1; --pink-light: #FCE4EC;
+            --text: #4A4A4A; --subtext: #9E9E9E; --blue: #81D4FA; --danger: #f44336;
         }
-        
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; 
-            box-sizing: border-box;
-            touch-action: manipulation; 
-            -webkit-tap-highlight-color: transparent; 
+            background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; 
+            display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent; 
         }
         
-        /* 登录 & 家长端 (保持基础逻辑，换上粉色系) */
+        /* 登录 & 家长端 */
         #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; }
         .login-box { background: var(--card); padding: 30px 20px; border-radius: 24px; box-shadow: 0 8px 24px rgba(244,143,177,0.15); width: 100%; max-width: 320px; text-align: center; }
         .login-box h2 { margin-top: 0; color: var(--pink-dark); }
@@ -47,7 +32,6 @@
         .btn-save { background: var(--pink-dark); }
         .btn-logout { background: #BDBDBD; float: right; padding: 6px 12px; font-size: 14px;}
         
-        /* 历史记录与校验列表 */
         .history-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; background: #fff; border-radius: 8px; overflow: hidden;}
         .history-table th, .history-table td { border: 1px solid var(--pink-light); padding: 8px; }
         .history-table th { background: var(--pink-light); color: var(--pink-dark); }
@@ -68,9 +52,7 @@
         .btn-cancel { background: #E0E0E0; color: #666; }
         .btn-confirm { background: var(--pink-dark); }
 
-        /* ================= 孩子端界面 ================= */
-        
-        /* 主页 */
+        /* 孩子端主页 */
         #homeScreen { display: none; flex-direction: column; gap: 20px; justify-content: center; height: 85vh; padding: 0 20px;}
         .header h1 { color: var(--pink-dark); font-size: 36px; margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(244,143,177,0.2);}
         .big-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 35%; border-radius: 32px; color: white; font-size: 42px; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.08); cursor: pointer; transition: transform 0.1s; }
@@ -80,53 +62,64 @@
         .btn-loop { background: linear-gradient(135deg, #424242, #212121); height: 18%; font-size: 28px;}
         .big-btn span { font-size: 20px; font-weight: normal; margin-top: 10px; opacity: 0.9;}
 
-        /* 专注阅读页 (横屏优化) */
+        /* 阅读页 */
         #readingScreen { display: none; flex-direction: column; flex: 1; }
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px;}
         .btn-back { background: transparent; border: none; font-size: 22px; color: var(--pink-dark); font-weight: bold; cursor: pointer; }
-        .progress-badge { background: var(--pink-light); color: var(--pink-dark); padding: 6px 16px; border-radius: 20px; font-size: 18px; font-weight: bold;}
         
-        .focus-card { background: var(--card); border-radius: 32px; padding: 30px 40px; box-shadow: 0 12px 32px rgba(244,143,177,0.1); display: flex; flex-direction: column; flex: 1; position: relative;}
-        .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 30px; border-bottom: 2px dashed var(--pink-light); padding-bottom: 15px;}
+        /* 进度条 */
+        .progress-container { flex: 1; margin: 0 20px; height: 16px; background: #E0E0E0; border-radius: 10px; overflow: hidden; position: relative;}
+        .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #F48FB1, #F06292); transition: width 0.5s ease; border-radius: 10px;}
+        .progress-text { font-size: 16px; font-weight: bold; color: var(--pink-dark); margin-left: 10px;}
+
+        .focus-card { background: var(--card); border-radius: 32px; padding: 30px 20px; box-shadow: 0 12px 32px rgba(244,143,177,0.1); display: flex; flex-direction: column; flex: 1; position: relative;}
+        .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 20px; padding-bottom: 15px;}
         
-        /* 横屏内容区：两列排版 */
-        .focus-content { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-content: center; overflow-y: auto; padding: 10px;}
-        
-        .line-block { text-align: center; cursor: pointer; padding: 15px; border-radius: 16px; transition: all 0.1s; background: #FAFAFA;}
+        /* 🎯 重点修改：改为居中垂直排列 */
+        .focus-content { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px; 
+            overflow-y: auto; 
+            padding: 10px;
+        }
+
+        /* 调整文本块样式，去除灰底，更干净 */
+        .line-block { 
+            text-align: center; 
+            cursor: pointer; 
+            padding: 8px 20px; 
+            border-radius: 12px; 
+            transition: all 0.1s; 
+            background: transparent; 
+            width: 100%;
+        }
         .line-block:active { background-color: var(--pink-light); transform: scale(0.98);}
-        
-        /* 字超大 */
-        .line-pinyin { font-size: 20px; color: var(--pink-dark); margin-bottom: 8px; letter-spacing: 2px; opacity: 0.8;}
-        .line-text { font-size: 42px; font-weight: bold; color: var(--text); line-height: 1.4; }
+        .line-pinyin { font-size: 20px; color: var(--pink-dark); margin-bottom: 5px; letter-spacing: 2px; opacity: 0.8;}
+        .line-text { font-size: 42px; font-weight: bold; color: var(--text); line-height: 1.3; }
         
         .bottom-action { margin-top: 20px; display: flex; flex-direction: row; gap: 20px; justify-content: center;}
         .btn-record { background: #FFB74D; color: white; border: none; padding: 16px 40px; border-radius: 20px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 12px rgba(255,183,77,0.3);}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
-        .btn-next { background: var(--pink-dark); color: white; border: none; padding: 16px 40px; border-radius: 20px; font-size: 24px; font-weight: bold; display: none; cursor: pointer; box-shadow: 0 6px 12px rgba(244,143,177,0.3);}
         
-        .status-text { font-size: 20px; font-weight: bold; text-align: center; padding: 12px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; cursor: pointer; margin-bottom: 15px;}
+        .status-text { font-size: 20px; font-weight: bold; text-align: center; padding: 12px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; margin-bottom: 15px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* 英语专属 */
-        .en-line { font-size: 38px; font-weight: bold; color: #333; margin-bottom: 10px; cursor: pointer; text-align: center; background:#FAFAFA; padding: 15px; border-radius: 16px;}
+        .en-line { font-size: 38px; font-weight: bold; color: #333; margin-bottom: 10px; cursor: pointer; text-align: center; padding: 15px; border-radius: 16px;}
+        .en-line:active { background-color: var(--pink-light); }
         .en-trans { font-size: 20px; color: #888; margin-bottom: 20px; text-align: center;}
-        .word-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px;}
-        .word-card { background: #E3F2FD; border: 3px solid var(--blue); border-radius: 20px; padding: 10px 24px; font-size: 32px; font-weight: bold; color: #1565C0; cursor: pointer;}
-        .phonics-list { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;}
-        .phonics-item { background: #E8F5E9; border-radius: 12px; padding: 10px 20px; font-size: 28px; font-weight: bold; color: #2E7D32; cursor: pointer;}
-
-        /* 循环播放模式 (黑屏极度省电) */
-        #loopScreen { display: none; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background-color: #000; color: #333; text-align: center; position: fixed; top:0; left:0; width:100%; z-index: 1001;}
-        .loop-icon { font-size: 80px; color: #111; margin-bottom: 20px; animation: pulse 3s infinite;}
-        .loop-text { font-size: 24px; color: #222; margin-bottom: 60px; padding: 0 20px; line-height: 1.5;}
-        .btn-stop-loop { background: #222; color: #666; border: none; padding: 20px 60px; border-radius: 40px; font-size: 20px; font-weight: bold; cursor: pointer;}
         
+        #loadingMask { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,240,245,0.9); z-index: 998; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: var(--pink-dark);}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- 登录 -->
+    <div id="loadingMask">🌸 正在识别中...</div>
+
     <div id="loginScreen">
         <div class="login-box">
             <h2>🌸 晨读小花园</h2>
@@ -136,7 +129,6 @@
         </div>
     </div>
 
-    <!-- 家长端 -->
     <div id="editModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -183,7 +175,6 @@
         </div>
     </div>
 
-    <!-- 孩子端主页 -->
     <div id="homeScreen">
         <div class="header" style="text-align:center;">
             <h1>🌸 每日晨读</h1>
@@ -203,35 +194,27 @@
         <button class="btn btn-logout" style="margin-top:20px; align-self:center;" onclick="logout()">退出登录</button>
     </div>
 
-    <!-- 孩子端阅读页 -->
     <div id="readingScreen">
         <div class="top-nav">
             <button class="btn-back" onclick="backToHome()">← 返回</button>
-            <div class="progress-badge" id="readingProgress">0 / 0</div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
         </div>
         
         <div class="focus-card">
             <div class="focus-title" id="focusTitle">加载中...</div>
             <div class="focus-content" id="focusContent"></div>
             
-            <div class="status-text" id="statusText" onclick="playLastRecord()">🔊 点我重听录音</div>
+            <div class="status-text" id="statusText"></div>
             
             <div class="bottom-action">
                 <button class="btn-record" id="btnRecord" onclick="toggleRecord()">
-                    🎤 录音跟读
-                </button>
-                <button class="btn-next" id="btnNext" onclick="nextTask()">
-                    确认读完，下一篇 →
+                    🎤 开始录音跟读
                 </button>
             </div>
         </div>
-    </div>
-
-    <!-- 循环磨耳朵 -->
-    <div id="loopScreen">
-        <div class="loop-icon">🎧</div>
-        <div class="loop-text" id="loopStatus">正在准备音频...</div>
-        <button class="btn-stop-loop" onclick="stopLoopMode()">退出磨耳朵</button>
     </div>
 
     <script>
@@ -247,7 +230,9 @@
         let currentSubject = '语文'; 
         let currentExtraTasks = [];
 
-        // ================= 发音 =================
+        const CACHE_KEY_ZH = 'cache_zh_tasks';
+        const CACHE_KEY_EN = 'cache_en_tasks';
+
         let globalAudio = new Audio(); 
         function speak(text, lang = 'zh-CN', event) {
             if (event) event.preventDefault(); 
@@ -290,13 +275,17 @@
             } else { alert('密码错误！'); }
         }
 
-        function logout() { localStorage.removeItem('morning_role'); location.reload(); }
+        function logout() { 
+            localStorage.removeItem('morning_role'); 
+            localStorage.removeItem(CACHE_KEY_ZH);
+            localStorage.removeItem(CACHE_KEY_EN);
+            location.reload(); 
+        }
 
         async function initApp() {
             document.getElementById('loginScreen').style.display = 'none';
             const { data: setting } = await db.from('morning_settings').select('*').eq('id', 1).single();
             if (setting) { currentWeek = setting.current_week; currentDay = setting.current_day; }
-            
             let dayName = currentDay === 7 ? '第7天' : `第${currentDay}天`;
             document.getElementById('subtitle').innerText = `进度：第 ${currentWeek} 周 · ${dayName}`;
 
@@ -307,10 +296,25 @@
                 loadEditList(); loadHistory();
             } else {
                 document.getElementById('homeScreen').style.display = 'flex';
+                prefetchTodayData();
             }
         }
 
-        // --- 家长端逻辑 ---
+        async function prefetchTodayData() {
+            let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
+            const { data: zhTasks } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
+            if (zhTasks) localStorage.setItem(CACHE_KEY_ZH, JSON.stringify(zhTasks));
+            
+            const today = getTodayDate();
+            const { data: enTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+            const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+            
+            if (enTasks) {
+                const enData = { main: enTasks, extra: exTasks || [] };
+                localStorage.setItem(CACHE_KEY_EN, JSON.stringify(enData));
+            }
+        }
+
         async function saveSettings() {
             const w = parseInt(document.getElementById('setWeek').value);
             const d = parseInt(document.getElementById('setDay').value);
@@ -369,7 +373,7 @@
             btn.innerText = '💾 保存修改';
         }
 
-        // ================= 孩子端逻辑 =================
+        // ================= 孩子端 =================
         function backToHome() {
             document.getElementById('readingScreen').style.display = 'none';
             document.getElementById('homeScreen').style.display = 'flex';
@@ -384,12 +388,16 @@
             document.getElementById('focusContent').innerHTML = '';
             document.getElementById('statusText').style.display = 'none';
             document.getElementById('btnRecord').style.display = 'none';
-            document.getElementById('btnNext').style.display = 'none';
 
             if (subject === '语文') {
-                currentExtraTasks = [];
-                let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
-                const { data: tasks } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
+                let cachedZh = localStorage.getItem(CACHE_KEY_ZH);
+                let tasks = cachedZh ? JSON.parse(cachedZh) : null;
+
+                if (!tasks) {
+                    let maxIndex = currentDay >= 7 ? 9 : currentDay + 2;
+                    const { data } = await db.from('morning_book').select('*').eq('week', currentWeek).lte('day_index', maxIndex).order('day_index', { ascending: true });
+                    tasks = data;
+                }
                 if (!tasks || tasks.length === 0) { alert('暂无内容'); backToHome(); return; }
                 
                 const today = getTodayDate();
@@ -411,12 +419,19 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
-                const today = getTodayDate();
-                const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
-                currentExtraTasks = exTasks || [];
+                let cachedEn = localStorage.getItem(CACHE_KEY_EN);
+                let enData = cachedEn ? JSON.parse(cachedEn) : null;
+                let engTasks = enData ? enData.main : null;
+                let exTasks = enData ? enData.extra : null;
 
-                const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
-                
+                if (!engTasks) {
+                    const today = getTodayDate();
+                    const res1 = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+                    const res2 = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+                    engTasks = res1.data;
+                    exTasks = res2.data;
+                }
+                currentExtraTasks = exTasks || [];
                 if (!engTasks || engTasks.length === 0) { 
                     if (currentExtraTasks.length === 0) { alert(`暂无英语内容`); backToHome(); return; }
                     else { todayTasks = []; }
@@ -428,16 +443,22 @@
             }
         }
 
-        // --- 渲染语文 (横屏断句) ---
-        function renderChineseTask() {
-            const task = todayTasks[currentTaskIndex];
-            document.getElementById('readingProgress').innerText = `${currentTaskIndex + 1} / ${todayTasks.length}`;
-            document.getElementById('focusTitle').innerText = task.title;
+        function updateProgressBar() {
+            let percent = Math.round((currentTaskIndex / todayTasks.length) * 100);
+            if (currentTaskIndex >= todayTasks.length) percent = 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').innerText = percent + '%';
+        }
 
-            // 🎯 强制按标点符号断句
+        // 🎯 渲染语文 (居中排版)
+        function renderChineseTask() {
+            if(currentTaskIndex >= todayTasks.length) return;
+            const task = todayTasks[currentTaskIndex];
+            document.getElementById('focusTitle').innerText = task.title;
+            updateProgressBar();
+
+            // 按照标点符号彻底断句
             let sentences = task.content.split(/(?<=[。！？；])/g).filter(s => s.trim().length > 0);
-            
-            // 处理拼音的分割（简单按空格和标点对应）
             let pinyins = task.pinyin ? task.pinyin.split(/(?<=[.?!;])/g).filter(s => s.trim().length > 0) : [];
 
             let html = '';
@@ -454,18 +475,17 @@
             resetBottomButtons();
         }
 
-        // --- 渲染英语 ---
         function renderEnglishTask() {
             let html = '';
             if (todayTasks.length > 0) {
                 const task = todayTasks[currentTaskIndex];
-                document.getElementById('readingProgress').innerText = `Day ${task.day_index}`;
                 document.getElementById('focusTitle').innerText = task.unit_title;
+                updateProgressBar();
                 html += generateEnglishHtml(task, false);
             }
 
             currentExtraTasks.forEach((ex, idx) => {
-                html += `<div style="grid-column: 1 / -1; text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 复习：${ex.unit_title}</div>`;
+                html += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 复习：${ex.unit_title}</div>`;
                 html += generateEnglishHtml(ex, true);
             });
             
@@ -477,10 +497,9 @@
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
             const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : [];
-            const phonicsArray = task.phonics ? task.phonics.split(',').map(p => p.trim()) : [];
             const fullText = sentenceList.join('. ');
 
-            let res = `<div style="grid-column: 1 / -1;">`;
+            let res = `<div style="width:100%;">`;
             res += `<button class="btn-record" style="width:100%; background:#81D4FA; margin-bottom:20px;" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>`;
             
             sentenceList.forEach((s, i) => {
@@ -490,56 +509,61 @@
                 `;
             });
             res += `</div>`;
-
-            if(wordsArray.length > 0) {
-                res += `<div style="grid-column: 1 / -1; text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">重点单词</div>`;
-                wordsArray.forEach(w => {
-                    const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
-                    const emoji = w.replace(/[a-zA-Z\s]/g, "").trim();
-                    res += `
-                    <div class="word-card" onclick="speak('${pureWord}', 'en-US', event)" style="margin: 0 auto;">
-                        <span>${pureWord}</span><span>${emoji}</span>
-                    </div>`;
-                });
-            }
             return res;
         }
 
         function resetBottomButtons() {
             const recBtn = document.getElementById('btnRecord');
-            const nextBtn = document.getElementById('btnNext');
             const statusText = document.getElementById('statusText');
-            
-            recBtn.innerText = '🎤 录音跟读';
+            recBtn.innerText = '🎤 开始录音跟读';
             recBtn.classList.remove('recording');
             recBtn.style.display = 'flex';
             recBtn.style.margin = '0 auto';
-            
-            nextBtn.style.display = 'none';
+            recBtn.disabled = false;
             statusText.style.display = 'none';
             isRecording = false;
+            isRecognizing = false;
         }
 
-        // --- 录音功能 ---
+        // ================= 🎯 语音识别与录音 =================
         let mediaRecorder, audioChunks = [], isRecording = false;
         let recordedBlob = null; 
+        let recognition = null;
+        let isRecognizing = false;
+        let recognizedText = "";
 
-        function playLastRecord() {
-            if (recordedBlob) {
-                const tempAudio = new Audio(URL.createObjectURL(recordedBlob));
-                tempAudio.play().catch(e => console.log('播放录音失败', e));
-                const statusText = document.getElementById('statusText');
-                statusText.innerText = '🔊 正在播放...';
-                setTimeout(() => { statusText.innerText = '🔊 点我重听录音'; }, 1500);
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("您的浏览器不支持语音识别，请用Safari或Chrome打开！");
+                return null;
             }
+            const rec = new SpeechRecognition();
+            rec.lang = 'zh-CN';
+            rec.continuous = true;
+            rec.interimResults = true;
+
+            rec.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                recognizedText = finalTranscript + interimTranscript;
+            };
+            return rec;
         }
 
         async function toggleRecord() {
             const btn = document.getElementById('btnRecord');
             const statusText = document.getElementById('statusText');
-            const nextBtn = document.getElementById('btnNext');
 
             if (!isRecording) {
+                recognizedText = ""; 
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
@@ -547,54 +571,112 @@
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
                     mediaRecorder.onstop = () => {
                         recordedBlob = new Blob(audioChunks, { type: 'audio/webm' }); 
-                        new Audio(URL.createObjectURL(recordedBlob)).play(); 
-                        
-                        btn.innerText = '🎤 重新录音';
-                        btn.classList.remove('recording');
-                        btn.style.display = 'none'; // 录完了先隐藏
-                        
-                        statusText.innerText = '🔊 点我重听录音';
-                        statusText.style.display = 'block'; 
-                        nextBtn.style.display = 'flex';
-                        nextBtn.style.margin = '0 auto';
                         stream.getTracks().forEach(track => track.stop());
                     };
                     mediaRecorder.start();
+
+                    recognition = initSpeechRecognition();
+                    if (recognition) {
+                        recognition.start();
+                        isRecognizing = true;
+                    }
+
                     isRecording = true;
-                    btn.innerText = '🛑 点击停止';
+                    btn.innerText = '🛑 读完请点结束';
                     btn.classList.add('recording');
-                    statusText.style.display = 'none';
-                    nextBtn.style.display = 'none';
-                } catch (err) { alert('无法访问麦克风！'); }
+                    statusText.innerText = '正在聆听...请大声朗读';
+                    statusText.style.display = 'block';
+
+                } catch (err) { 
+                    alert('无法访问麦克风！请检查权限。'); 
+                }
             } else {
-                mediaRecorder.stop();
+                btn.innerText = '⏳ 识别中...';
+                btn.classList.remove('recording');
+                btn.disabled = true;
+                
+                if (recognition && isRecognizing) {
+                    recognition.stop();
+                    isRecognizing = false;
+                }
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
                 isRecording = false;
+
+                setTimeout(() => {
+                    checkReading();
+                }, 1000);
             }
         }
 
-        async function nextTask() {
-            if (currentSubject === '语文') {
-                const task = todayTasks[currentTaskIndex];
-                const today = getTodayDate();
-                const newCount = task._currentCount + 1;
-                if (task._recordId) await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
-                else await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
+        function checkReading() {
+            const statusText = document.getElementById('statusText');
+            const btn = document.getElementById('btnRecord');
+            btn.disabled = false;
 
-                if (newCount < task._targetCount) {
-                    task._currentCount = newCount;
-                    document.getElementById('statusText').innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
-                    document.getElementById('statusText').style.display = 'block';
-                    document.getElementById('btnRecord').style.display = 'flex';
-                    document.getElementById('btnRecord').innerText = '🎤 再读一遍';
-                    document.getElementById('btnNext').style.display = 'none';
-                    return;
+            if (!recognizedText || recognizedText.trim().length < 2) {
+                statusText.innerText = '❌ 没听清哦，请再试一次~';
+                statusText.style.background = '#FFEBEE';
+                statusText.style.color = '#D32F2F';
+                btn.innerText = '🎤 重新开始';
+                return;
+            }
+
+            const task = todayTasks[currentTaskIndex];
+            const bookClean = task.content.replace(/[^\u4e00-\u9fa5]/g, '');
+            const userClean = recognizedText.replace(/[^\u4e00-\u9fa5]/g, '');
+
+            let matchCount = 0;
+            for (let i = 0; i < bookClean.length; i++) {
+                if (userClean.includes(bookClean[i])) {
+                    matchCount++;
                 }
-                currentTaskIndex++;
-                if (currentTaskIndex >= todayTasks.length) await advanceProgress();
-                else renderChineseTask();
+            }
+            const accuracy = matchCount / bookClean.length;
+
+            if (accuracy > 0.6) { 
+                statusText.innerText = `✅ 读得真棒！识别率 ${Math.round(accuracy*100)}%`;
+                statusText.style.background = '#E8F5E9';
+                statusText.style.color = '#2E7D32';
+                
+                if (recordedBlob) new Audio(URL.createObjectURL(recordedBlob)).play();
+                
+                btn.innerText = '🎉 正在保存...';
+                
+                setTimeout(() => {
+                    saveAndNext(task);
+                }, 1500);
+
             } else {
-                alert('🎉 英语跟读完成！');
-                backToHome();
+                statusText.innerText = `❌ 感觉有点不对哦，再读一遍试试？`;
+                statusText.style.background = '#FFEBEE';
+                statusText.style.color = '#D32F2F';
+                btn.innerText = '🎤 重新开始';
+            }
+        }
+
+        async function saveAndNext(task) {
+            const today = getTodayDate();
+            const newCount = task._currentCount + 1;
+            if (task._recordId) await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
+            else await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
+
+            if (newCount < task._targetCount) {
+                task._currentCount = newCount;
+                document.getElementById('statusText').innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
+                document.getElementById('statusText').style.display = 'block';
+                document.getElementById('btnRecord').innerText = '🎤 再读一遍';
+                document.getElementById('btnRecord').disabled = false;
+                return;
+            }
+            
+            currentTaskIndex++;
+            if (currentTaskIndex >= todayTasks.length) {
+                updateProgressBar();
+                await advanceProgress();
+            } else {
+                renderChineseTask(); 
             }
         }
 
@@ -603,61 +685,8 @@
             let newDay = currentDay + 1;
             if (newDay > 7) { newWeek = currentWeek + 1; newDay = 1; }
             await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
-            alert(`🎉 太棒了！任务已完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
+            alert(`🎉 太棒了！任务全部完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
             location.reload();
-        }
-
-        // ================= 🎧 黑屏磨耳朵 =================
-        let loopQueue = [];
-        let isLooping = false;
-
-        async function startLoopMode() {
-            document.getElementById('homeScreen').style.display = 'none';
-            document.getElementById('loopScreen').style.display = 'flex';
-            document.getElementById('loopStatus').innerText = '正在准备音频...';
-            
-            loopQueue = [];
-            const today = getTodayDate();
-
-            const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
-            if (engTasks && engTasks.length > 0) {
-                loopQueue.push(engTasks[0].sentences.replace(/\|/g, '. '));
-            }
-            const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
-            if (exTasks) {
-                exTasks.forEach(t => { loopQueue.push(t.sentences.replace(/\|/g, '. ')); });
-            }
-
-            if (loopQueue.length === 0) { alert('暂无英语内容'); stopLoopMode(); return; }
-            isLooping = true;
-            playLoopQueue();
-        }
-
-        function playLoopQueue() {
-            if (!isLooping) return;
-            let index = 0;
-            function playNext() {
-                if (!isLooping) return;
-                if (index >= loopQueue.length) {
-                    document.getElementById('loopStatus').innerText = '一轮完毕，3秒后重播...';
-                    setTimeout(() => { if(isLooping) { index = 0; playNext(); } }, 3000);
-                    return;
-                }
-                const text = loopQueue[index];
-                document.getElementById('loopStatus').innerText = text;
-                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
-                globalAudio.src = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
-                globalAudio.onended = () => { index++; setTimeout(playNext, 1500); };
-                globalAudio.play().catch(() => { index++; playNext(); });
-            }
-            playNext();
-        }
-
-        function stopLoopMode() {
-            isLooping = false;
-            globalAudio.pause();
-            document.getElementById('loopScreen').style.display = 'none';
-            document.getElementById('homeScreen').style.display = 'flex';
         }
 
         window.onload = () => {
