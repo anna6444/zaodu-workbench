@@ -76,25 +76,10 @@
         .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 20px; padding-bottom: 15px;}
         
         .focus-content { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 15px; 
-            overflow-y: auto; 
-            padding: 10px;
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; overflow-y: auto; padding: 10px;
         }
 
-        .line-block { 
-            text-align: center; 
-            cursor: pointer; 
-            padding: 8px 20px; 
-            border-radius: 12px; 
-            transition: all 0.1s; 
-            background: transparent; 
-            width: 100%;
-        }
+        .line-block { text-align: center; cursor: pointer; padding: 8px 20px; border-radius: 12px; transition: all 0.1s; background: transparent; width: 100%; }
         .line-block:active { background-color: var(--pink-light); transform: scale(0.98);}
         .line-pinyin { font-size: 20px; color: var(--pink-dark); margin-bottom: 5px; letter-spacing: 2px; opacity: 0.8;}
         .line-text { font-size: 42px; font-weight: bold; color: var(--text); line-height: 1.3; }
@@ -112,17 +97,13 @@
         .en-trans { font-size: 20px; color: #888; margin-bottom: 20px; text-align: center;}
         
         #loadingMask { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,240,245,0.9); z-index: 998; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: var(--pink-dark);}
-
-        /* 🎯 新增：全局提示 Toast (用于循环播放) */
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; z-index: 2000; display: none; white-space: nowrap; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- 🎯 全局提示 -->
     <div id="toast"></div>
-
     <div id="loadingMask">🌸 正在识别中...</div>
 
     <div id="loginScreen">
@@ -178,6 +159,21 @@
             <button class="btn btn-blue" onclick="loadEditList()">刷新本周列表</button>
             <div class="edit-list" id="editListContainer"></div>
         </div>
+        
+        <!-- 临时加餐 -->
+        <div class="admin-panel" style="background:#E8F5E9; border:2px dashed #4CAF50;">
+            <h3 style="color:#2E7D32;">🍎 临时加餐（英语）</h3>
+            <p style="font-size:13px; color:#666; margin-top:0;">说明：用 <b>|</b> 分隔句子。</p>
+            <div class="modal-label">标题：</div>
+            <input type="text" id="extraTitle" class="modal-input" placeholder="今日加餐">
+            <div class="modal-label">英文句子 (用 | 隔开)：</div>
+            <input type="text" id="extraSentences" class="modal-input" placeholder="Good morning! | How are you?">
+            <div class="modal-label">中文翻译 (用 | 隔开，选填)：</div>
+            <input type="text" id="extraTrans" class="modal-input" placeholder="早上好！| 你好吗？">
+            <div class="modal-label">生效日期 (默认今天)：</div>
+            <input type="date" id="extraDate" class="modal-input">
+            <button class="btn btn-confirm" style="width:100%; background:#4CAF50; margin-top:10px;" onclick="addExtraTask()">➕ 添加到晨读列表</button>
+        </div>
     </div>
 
     <div id="homeScreen">
@@ -211,9 +207,7 @@
         <div class="focus-card">
             <div class="focus-title" id="focusTitle">加载中...</div>
             <div class="focus-content" id="focusContent"></div>
-            
             <div class="status-text" id="statusText"></div>
-            
             <div class="bottom-action">
                 <button class="btn-record" id="btnRecord" onclick="toggleRecord()">
                     🎤 开始录音跟读
@@ -238,33 +232,20 @@
         const CACHE_KEY_ZH = 'cache_zh_tasks';
         const CACHE_KEY_EN = 'cache_en_tasks';
 
-        // 🎯 修复1：发音函数兼容 event 传参，并保留英文空格
-        let globalAudio = new Audio(); 
+        // 🎯 终极音频方案：使用原生 TTS，100% 出声，抛弃不稳定的外链
         function speak(text, lang = 'zh-CN', event) {
-            if (event) event.preventDefault(); // 防止点击穿透
-            globalAudio.pause();
-            globalAudio.currentTime = 0;
+            if (event) event.preventDefault(); 
             if (window.speechSynthesis) window.speechSynthesis.cancel();
-
-            if (lang === 'en-US') {
-                // 只去掉标点，保留空格！
-                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
-                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
-                globalAudio.src = audioUrl;
-                globalAudio.play().catch(err => fallbackSpeak(text, lang));
-            } else {
-                fallbackSpeak(text, lang);
-            }
-        }
-
-        function fallbackSpeak(text, lang) {
+            
             const synth = window.speechSynthesis;
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            utterance.rate = (lang === 'en-US') ? 0.8 : 0.85;
+            utterance.rate = (lang === 'en-US') ? 0.85 : 0.9;
+            
             const voices = synth.getVoices();
             const targetVoice = voices.find(v => v.lang.includes(lang));
             if (targetVoice) utterance.voice = targetVoice;
+
             synth.speak(utterance);
         }
 
@@ -273,7 +254,6 @@
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
         }
 
-        // 🎯 修复2：全局 Toast 提示
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.innerText = msg;
@@ -309,6 +289,7 @@
                 document.getElementById('parentScreen').style.display = 'block';
                 document.getElementById('setWeek').value = currentWeek;
                 document.getElementById('setDay').value = currentDay;
+                document.getElementById('extraDate').value = new Date().toISOString().split('T')[0];
                 loadEditList(); loadHistory();
             } else {
                 document.getElementById('homeScreen').style.display = 'flex';
@@ -389,11 +370,39 @@
             btn.innerText = '💾 保存修改';
         }
 
+        async function addExtraTask() {
+            const title = document.getElementById('extraTitle').value.trim() || '今日加餐';
+            const sentences = document.getElementById('extraSentences').value.trim();
+            const trans = document.getElementById('extraTrans').value.trim();
+            const dateInput = document.getElementById('extraDate').value;
+
+            if (!sentences) { alert('请至少输入一句英文！'); return; }
+
+            let finalDate = getTodayDate(); 
+            if (dateInput) {
+                const parts = dateInput.split('-');
+                finalDate = `${parseInt(parts[0])}-${parseInt(parts[1])}-${parseInt(parts[2])}`;
+            }
+
+            const btn = document.querySelector('.btn-confirm[onclick="addExtraTask()"]');
+            btn.innerText = '⏳ 保存中...'; btn.disabled = true;
+
+            const { error } = await db.from('morning_english_extra').insert([{ 
+                unit_title: title, sentences: sentences, translation: trans, study_dates: finalDate, created_date: getTodayDate() 
+            }]);
+
+            if (error) { console.error(error); alert('保存失败！'); } 
+            else {
+                alert('✅ 加餐成功！'); document.getElementById('extraSentences').value = '';
+                localStorage.removeItem(CACHE_KEY_EN);
+            }
+            btn.innerText = '➕ 添加到晨读列表'; btn.disabled = false;
+        }
+
         // ================= 孩子端 =================
         function backToHome() {
             document.getElementById('readingScreen').style.display = 'none';
             document.getElementById('homeScreen').style.display = 'flex';
-            if (globalAudio) globalAudio.pause();
             if (window.speechSynthesis) window.speechSynthesis.cancel();
         }
 
@@ -437,24 +446,32 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
-                let cachedEn = localStorage.getItem(CACHE_KEY_EN);
-                let enData = cachedEn ? JSON.parse(cachedEn) : null;
-                let engTasks = enData ? enData.main : null;
-                let exTasks = enData ? enData.extra : null;
+                const today = getTodayDate();
+                const res1 = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+                let engTasks = res1.data || [];
+                
+                const res2 = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+                let exTasks = res2.data || [];
+                
+                const { data: todayRecords } = await db.from('morning_records').select('*').eq('read_date', today);
+                const recordMap = {};
+                if(todayRecords) todayRecords.forEach(r => recordMap[r.task_id] = r);
 
-                if (!engTasks) {
-                    const today = getTodayDate();
-                    const res1 = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
-                    const res2 = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
-                    engTasks = res1.data;
-                    exTasks = res2.data;
-                }
-                currentExtraTasks = exTasks || [];
-                if (!engTasks || engTasks.length === 0) { 
-                    if (currentExtraTasks.length === 0) { alert(`暂无英语内容`); backToHome(); return; }
-                    else { todayTasks = []; }
-                } else {
-                    todayTasks = engTasks;
+                currentExtraTasks = [];
+                exTasks.forEach(ex => {
+                    let targetCount = 1; 
+                    let currentCount = recordMap[ex.id] ? recordMap[ex.id].read_count : 0;
+                    if (currentCount < targetCount) {
+                        ex._targetCount = targetCount;
+                        ex._currentCount = currentCount;
+                        ex._recordId = recordMap[ex.id] ? recordMap[ex.id].id : null;
+                        currentExtraTasks.push(ex);
+                    }
+                });
+
+                todayTasks = engTasks; 
+                if (todayTasks.length === 0 && currentExtraTasks.length === 0) { 
+                    alert(`🎉 今天的英语任务全部完成啦！`); backToHome(); return; 
                 }
                 currentTaskIndex = 0;
                 renderEnglishTask();
@@ -468,7 +485,6 @@
             document.getElementById('progressText').innerText = percent + '%';
         }
 
-        // 渲染语文
         function renderChineseTask() {
             if(currentTaskIndex >= todayTasks.length) return;
             const task = todayTasks[currentTaskIndex];
@@ -482,8 +498,7 @@
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
                 const py = pinyins[index] ? pinyins[index].trim() : '';
-                html += `
-                <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
+                html += `<div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
                     ${py ? `<div class="line-pinyin">${py}</div>` : ''}
                     <div class="line-text">${clean}</div>
                 </div>`;
@@ -499,13 +514,15 @@
                 document.getElementById('focusTitle').innerText = task.unit_title;
                 updateProgressBar();
                 html += generateEnglishHtml(task, false);
+            } else {
+                document.getElementById('progressBar').style.width = '100%';
+                document.getElementById('progressText').innerText = '复习';
             }
 
             currentExtraTasks.forEach((ex, idx) => {
-                html += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 复习：${ex.unit_title}</div>`;
+                html += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 加餐 (第 ${ex._currentCount + 1}/${ex._targetCount} 遍)：${ex.unit_title}</div>`;
                 html += generateEnglishHtml(ex, true);
             });
-            
             document.getElementById('focusContent').innerHTML = html;
             resetBottomButtons();
         }
@@ -517,12 +534,9 @@
 
             let res = `<div style="width:100%;">`;
             res += `<button class="btn-record" style="width:100%; background:#81D4FA; margin-bottom:20px;" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>`;
-            
             sentenceList.forEach((s, i) => {
-                res += `
-                    <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
-                    <div class="en-trans">${transList[i] || ''}</div>
-                `;
+                res += `<div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
+                        <div class="en-trans">${transList[i] || ''}</div>`;
             });
             res += `</div>`;
             return res;
@@ -541,14 +555,12 @@
             isRecognizing = false;
         }
 
-        // ================= 🎯 语音识别与录音（核心修复区） =================
+        // ================= 🎯 核心修复：录音与识别引擎 =================
         let mediaRecorder, audioChunks = [], isRecording = false;
-        let recordedBlob = null; 
         let recognition = null;
         let isRecognizing = false;
         let recognizedText = "";
 
-        // 🎯 修复3：每次录音强制重新初始化识别器，并动态设置语言
         function initSpeechRecognition(langCode) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -556,27 +568,18 @@
                 return null;
             }
             const rec = new SpeechRecognition();
-            rec.lang = langCode; // 'zh-CN' 或 'en-US'
+            rec.lang = langCode; 
             rec.continuous = true;
             rec.interimResults = true;
 
             rec.onresult = (event) => {
-                let interimTranscript = '';
                 let finalTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                    finalTranscript += event.results[i][0].transcript;
                 }
-                recognizedText = finalTranscript + interimTranscript;
+                recognizedText = finalTranscript;
             };
-
-            // 🎯 修复4：识别出错时静默处理，防崩
-            rec.onerror = (e) => {
-                console.warn("识别出错:", e.error);
-            };
+            rec.onerror = (e) => { console.warn("识别出错:", e.error); };
             return rec;
         }
 
@@ -585,23 +588,20 @@
             const statusText = document.getElementById('statusText');
 
             if (!isRecording) {
-                // 🎯 修复5：录音前强制停止所有发音，防止麦克风录入播放声音
-                if (globalAudio) { globalAudio.pause(); globalAudio.currentTime = 0; }
                 if (window.speechSynthesis) window.speechSynthesis.cancel();
-
                 recognizedText = ""; 
+                
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
-                    mediaRecorder.onstop = () => {
-                        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' }); 
-                        stream.getTracks().forEach(track => track.stop());
-                    };
+                    mediaRecorder.onstop = () => { stream.getTracks().forEach(track => track.stop()); };
                     mediaRecorder.start();
 
-                    // 🎯 动态判断语言
+                    // 每次录音前彻底销毁旧的引擎，防止卡死
+                    if (recognition) { recognition.abort(); recognition = null; }
+                    
                     const langCode = currentSubject === '英语' ? 'en-US' : 'zh-CN';
                     recognition = initSpeechRecognition(langCode);
                     if (recognition) {
@@ -617,26 +617,17 @@
                     statusText.style.background = '#FFF8E1';
                     statusText.style.color = '#E65100';
 
-                } catch (err) { 
-                    alert('无法访问麦克风！请检查权限。'); 
-                }
+                } catch (err) { alert('无法访问麦克风！请检查权限。'); }
             } else {
                 btn.innerText = '⏳ 识别中...';
                 btn.classList.remove('recording');
                 btn.disabled = true;
                 
-                if (recognition && isRecognizing) {
-                    recognition.stop();
-                    isRecognizing = false;
-                }
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                }
+                if (recognition && isRecognizing) { recognition.stop(); isRecognizing = false; }
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); }
                 isRecording = false;
 
-                setTimeout(() => {
-                    checkReading();
-                }, 1000);
+                setTimeout(() => { checkReading(); }, 800);
             }
         }
 
@@ -645,8 +636,7 @@
             const btn = document.getElementById('btnRecord');
             btn.disabled = false;
 
-            // 🎯 修复6：英语和语文不同的“读完就给过”逻辑
-            if (!recognizedText || recognizedText.trim().length < 2) {
+            if (!recognizedText || recognizedText.trim().length < 1) {
                 statusText.innerText = '❌ 没听清哦，请再试一次~';
                 statusText.style.background = '#FFEBEE';
                 statusText.style.color = '#D32F2F';
@@ -654,12 +644,25 @@
                 return;
             }
 
-            const task = todayTasks[currentTaskIndex];
+            let task = null;
+            let isExtraTask = false;
+
+            if (currentSubject === '语文') {
+                task = todayTasks[currentTaskIndex];
+            } else {
+                if (currentTaskIndex < todayTasks.length) {
+                    task = todayTasks[currentTaskIndex];
+                } else {
+                    task = currentExtraTasks.find(ex => ex._currentCount < ex._targetCount);
+                    isExtraTask = true;
+                }
+            }
+            if (!task) return;
+
             let isPass = false;
             let accuracy = 0;
 
             if (currentSubject === '语文') {
-                // 语文逻辑：包含 60% 以上的字就算过
                 const bookClean = task.content.replace(/[^\u4e00-\u9fa5]/g, '');
                 const userClean = recognizedText.replace(/[^\u4e00-\u9fa5]/g, '');
                 let matchCount = 0;
@@ -667,15 +670,13 @@
                     if (userClean.includes(bookClean[i])) matchCount++;
                 }
                 accuracy = matchCount / bookClean.length;
-                isPass = accuracy > 0.6;
-
-            } else if (currentSubject === '英语') {
-                // 英语逻辑：只要开口读了（识别到了字母），且不是完全不相干的乱语，就给过
-                // 简单判断：识别出的字母数量大于 2 即可（对应你说的“大概读全了就行”）
-                const cleanText = recognizedText.replace(/[^a-zA-Z]/g, '');
-                if (cleanText.length > 2) {
+                isPass = accuracy > 0.7; 
+            } else {
+                const targetText = task.sentences.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                const userText = recognizedText.replace(/[^a-zA-Z]/g, '').toLowerCase();
+                if (userText.length > targetText.length * 0.3) {
                     isPass = true;
-                    accuracy = 1; // 英语强制给 100% 识别率
+                    accuracy = 1; 
                 }
             }
 
@@ -683,19 +684,11 @@
                 statusText.innerText = `✅ 读得真棒！识别率 ${Math.round(accuracy*100)}%`;
                 statusText.style.background = '#E8F5E9';
                 statusText.style.color = '#2E7D32';
-                
-                // 语文：如果有录音，播放一遍；英语：直接过
-                if (recordedBlob && currentSubject === '语文') new Audio(URL.createObjectURL(recordedBlob)).play();
-                
                 btn.innerText = '🎉 正在保存...';
                 
-                // 🎯 修复7：清除录音缓存（读完即删）
-                recordedBlob = null;
-                audioChunks = [];
-
                 setTimeout(() => {
-                    saveAndNext(task);
-                }, 1500);
+                    saveAndNext(task, isExtraTask);
+                }, 1000);
 
             } else {
                 statusText.innerText = `❌ 感觉有点不对哦，再读一遍试试？`;
@@ -705,30 +698,58 @@
             }
         }
 
-        async function saveAndNext(task) {
+        async function saveAndNext(task, isExtraTask = false) {
             const today = getTodayDate();
             const newCount = task._currentCount + 1;
+            
             if (task._recordId) await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
             else await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
 
-            if (newCount < task._targetCount) {
-                task._currentCount = newCount;
-                document.getElementById('statusText').innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
-                document.getElementById('statusText').style.display = 'block';
-                document.getElementById('btnRecord').innerText = '🎤 再读一遍';
-                document.getElementById('btnRecord').disabled = false;
-                // 🎯 修复8：进度条在此处也要更新
-                updateProgressBar();
-                return;
-            }
-            
-            currentTaskIndex++;
-            if (currentTaskIndex >= todayTasks.length) {
-                updateProgressBar();
-                await advanceProgress();
+            task._currentCount = newCount;
+            const statusText = document.getElementById('statusText');
+
+            if (currentSubject === '语文') {
+                let totalRequired = todayTasks.reduce((sum, t) => sum + t._targetCount, 0);
+                let totalDone = todayTasks.reduce((sum, t) => sum + t._currentCount, 0);
+                let percent = Math.round((totalDone / totalRequired) * 100);
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('progressText').innerText = percent + '%';
+
+                if (newCount < task._targetCount) {
+                    statusText.innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
+                    statusText.style.display = 'block';
+                    document.getElementById('btnRecord').innerText = '🎤 再读一遍';
+                    document.getElementById('btnRecord').disabled = false;
+                    return;
+                }
+                
+                currentTaskIndex++;
+                if (currentTaskIndex >= todayTasks.length) {
+                    await advanceProgress();
+                } else {
+                    renderChineseTask(); 
+                }
             } else {
-                renderChineseTask(); 
-                if(currentSubject === '英语') renderEnglishTask();
+                if (!isExtraTask) {
+                    document.getElementById('progressBar').style.width = '100%';
+                    document.getElementById('progressText').innerText = '100%';
+                    currentTaskIndex++;
+                }
+                
+                if (isExtraTask && newCount < task._targetCount) {
+                    statusText.innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
+                    statusText.style.display = 'block';
+                    document.getElementById('btnRecord').innerText = '🎤 再读一遍';
+                    document.getElementById('btnRecord').disabled = false;
+                    return;
+                }
+
+                if (currentTaskIndex >= todayTasks.length && currentExtraTasks.every(ex => ex._currentCount >= ex._targetCount)) {
+                    alert(`🎉 太棒了！英语任务全部完成！`);
+                    backToHome();
+                } else {
+                    renderEnglishTask(); 
+                }
             }
         }
 
@@ -737,17 +758,23 @@
             let newDay = currentDay + 1;
             if (newDay > 7) { newWeek = currentWeek + 1; newDay = 1; }
             await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
-            alert(`🎉 太棒了！任务全部完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
+            alert(`🎉 太棒了！语文任务全部完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
             location.reload();
         }
 
-        // ================= 🎧 循环磨耳朵（修复界面无反馈问题） =================
+        // ================= 🎧 循环磨耳朵（彻底修复无声音） =================
         let loopQueue = [];
         let isLooping = false;
+        let currentLoopIndex = 0;
 
         async function startLoopMode() {
-            showToast("🎧 正在准备音频...");
+            if (isLooping) { stopLoopMode(); return; }
             
+            // iOS 必须要在点击事件里先激活一次发声，否则后面都是哑巴
+            let wakeUp = new SpeechSynthesisUtterance(" ");
+            window.speechSynthesis.speak(wakeUp);
+
+            showToast("🎧 正在准备音频...");
             loopQueue = [];
             const today = getTodayDate();
 
@@ -762,46 +789,55 @@
 
             if (loopQueue.length === 0) { alert('暂无英语内容'); return; }
             isLooping = true;
-            playLoopQueue();
+            currentLoopIndex = 0;
+            playNextLoopAudio();
         }
 
-        function playLoopQueue() {
+        function playNextLoopAudio() {
             if (!isLooping) return;
-            let index = 0;
             
-            function playNext() {
-                if (!isLooping) return;
-                if (index >= loopQueue.length) {
-                    showToast("🔄 一轮完毕，3秒后重播...");
-                    setTimeout(() => { if(isLooping) { index = 0; playNext(); } }, 3000);
-                    return;
-                }
-                const text = loopQueue[index];
-                showToast(`🔊 正在播放：${text.substring(0, 15)}...`);
-                
-                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
-                globalAudio.src = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
-                
-                globalAudio.onended = () => { index++; setTimeout(playNext, 1500); };
-                globalAudio.onerror = () => { index++; playNext(); }; // 播放失败直接跳过
-                
-                globalAudio.play().catch(() => { index++; playNext(); });
+            if (currentLoopIndex >= loopQueue.length) {
+                showToast("🔄 一轮完毕，3秒后重播...");
+                setTimeout(() => { if(isLooping) { currentLoopIndex = 0; playNextLoopAudio(); } }, 3000);
+                return;
             }
-            playNext();
+
+            const text = loopQueue[currentLoopIndex];
+            showToast(`🔊 正在播放：${text.substring(0, 15)}...`);
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85; 
+            
+            utterance.onend = () => { 
+                if (!isLooping) return;
+                currentLoopIndex++; 
+                setTimeout(playNextLoopAudio, 1000); 
+            };
+            utterance.onerror = () => {
+                if (!isLooping) return;
+                currentLoopIndex++; 
+                setTimeout(playNextLoopAudio, 1000);
+            }
+
+            window.speechSynthesis.speak(utterance);
         }
 
         function stopLoopMode() {
             isLooping = false;
-            globalAudio.pause();
+            window.speechSynthesis.cancel();
             showToast("⏹️ 已停止播放");
         }
 
-        // 点击顶部返回/任意位置可以打断循环 (兼容)
-        document.getElementById('homeScreen').addEventListener('click', () => {
-            if (isLooping) stopLoopMode();
+        // 点击主页能打断循环
+        document.getElementById('homeScreen').addEventListener('click', (e) => {
+            if (isLooping && !e.target.classList.contains('btn-loop')) {
+                stopLoopMode();
+            }
         });
 
         window.onload = () => {
+            // 预热语音引擎
             if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
             if (userRole) initApp();
         };
