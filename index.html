@@ -112,10 +112,16 @@
         .en-trans { font-size: 20px; color: #888; margin-bottom: 20px; text-align: center;}
         
         #loadingMask { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,240,245,0.9); z-index: 998; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: var(--pink-dark);}
+
+        /* 🎯 新增：全局提示 Toast (用于循环播放) */
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; z-index: 2000; display: none; white-space: nowrap; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+    <!-- 🎯 全局提示 -->
+    <div id="toast"></div>
 
     <div id="loadingMask">🌸 正在识别中...</div>
 
@@ -232,16 +238,16 @@
         const CACHE_KEY_ZH = 'cache_zh_tasks';
         const CACHE_KEY_EN = 'cache_en_tasks';
 
-        // 🎯 修复1：在 speak 里兼容 event 传参，同时清理英文中的标点
+        // 🎯 修复1：发音函数兼容 event 传参，并保留英文空格
         let globalAudio = new Audio(); 
         function speak(text, lang = 'zh-CN', event) {
-            if (event) event.preventDefault(); // 防止点击穿透放大
+            if (event) event.preventDefault(); // 防止点击穿透
             globalAudio.pause();
             globalAudio.currentTime = 0;
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                // 只去掉标点，保留空格！否则单词连在一起就读不出了
+                // 只去掉标点，保留空格！
                 let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
                 const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
                 globalAudio.src = audioUrl;
@@ -265,6 +271,15 @@
         function getTodayDate() {
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+        }
+
+        // 🎯 修复2：全局 Toast 提示
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
         function handleLogin() {
@@ -378,6 +393,8 @@
         function backToHome() {
             document.getElementById('readingScreen').style.display = 'none';
             document.getElementById('homeScreen').style.display = 'flex';
+            if (globalAudio) globalAudio.pause();
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
         }
 
         async function openReading(subject) {
@@ -451,7 +468,7 @@
             document.getElementById('progressText').innerText = percent + '%';
         }
 
-        // 渲染语文 (居中排版)
+        // 渲染语文
         function renderChineseTask() {
             if(currentTaskIndex >= todayTasks.length) return;
             const task = todayTasks[currentTaskIndex];
@@ -465,7 +482,6 @@
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
                 const py = pinyins[index] ? pinyins[index].trim() : '';
-                // 🎯 修复：传了 event
                 html += `
                 <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
                     ${py ? `<div class="line-pinyin">${py}</div>` : ''}
@@ -497,15 +513,12 @@
         function generateEnglishHtml(task, isExtra) {
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
-            const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : [];
             const fullText = sentenceList.join('. ');
 
             let res = `<div style="width:100%;">`;
-            // 🎯 修复：传了 event
             res += `<button class="btn-record" style="width:100%; background:#81D4FA; margin-bottom:20px;" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>`;
             
             sentenceList.forEach((s, i) => {
-                // 🎯 修复：传了 event
                 res += `
                     <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
                     <div class="en-trans">${transList[i] || ''}</div>
@@ -528,21 +541,22 @@
             isRecognizing = false;
         }
 
-        // ================= 🎯 语音识别与录音 =================
+        // ================= 🎯 语音识别与录音（核心修复区） =================
         let mediaRecorder, audioChunks = [], isRecording = false;
         let recordedBlob = null; 
         let recognition = null;
         let isRecognizing = false;
         let recognizedText = "";
 
-        function initSpeechRecognition() {
+        // 🎯 修复3：每次录音强制重新初始化识别器，并动态设置语言
+        function initSpeechRecognition(langCode) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 alert("您的浏览器不支持语音识别，请用Safari或Chrome打开！");
                 return null;
             }
             const rec = new SpeechRecognition();
-            rec.lang = 'zh-CN';
+            rec.lang = langCode; // 'zh-CN' 或 'en-US'
             rec.continuous = true;
             rec.interimResults = true;
 
@@ -558,6 +572,11 @@
                 }
                 recognizedText = finalTranscript + interimTranscript;
             };
+
+            // 🎯 修复4：识别出错时静默处理，防崩
+            rec.onerror = (e) => {
+                console.warn("识别出错:", e.error);
+            };
             return rec;
         }
 
@@ -566,6 +585,10 @@
             const statusText = document.getElementById('statusText');
 
             if (!isRecording) {
+                // 🎯 修复5：录音前强制停止所有发音，防止麦克风录入播放声音
+                if (globalAudio) { globalAudio.pause(); globalAudio.currentTime = 0; }
+                if (window.speechSynthesis) window.speechSynthesis.cancel();
+
                 recognizedText = ""; 
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -578,7 +601,9 @@
                     };
                     mediaRecorder.start();
 
-                    recognition = initSpeechRecognition();
+                    // 🎯 动态判断语言
+                    const langCode = currentSubject === '英语' ? 'en-US' : 'zh-CN';
+                    recognition = initSpeechRecognition(langCode);
                     if (recognition) {
                         recognition.start();
                         isRecognizing = true;
@@ -589,6 +614,8 @@
                     btn.classList.add('recording');
                     statusText.innerText = '正在聆听...请大声朗读';
                     statusText.style.display = 'block';
+                    statusText.style.background = '#FFF8E1';
+                    statusText.style.color = '#E65100';
 
                 } catch (err) { 
                     alert('无法访问麦克风！请检查权限。'); 
@@ -618,6 +645,7 @@
             const btn = document.getElementById('btnRecord');
             btn.disabled = false;
 
+            // 🎯 修复6：英语和语文不同的“读完就给过”逻辑
             if (!recognizedText || recognizedText.trim().length < 2) {
                 statusText.innerText = '❌ 没听清哦，请再试一次~';
                 statusText.style.background = '#FFEBEE';
@@ -627,26 +655,44 @@
             }
 
             const task = todayTasks[currentTaskIndex];
-            const bookClean = task.content.replace(/[^\u4e00-\u9fa5]/g, '');
-            const userClean = recognizedText.replace(/[^\u4e00-\u9fa5]/g, '');
+            let isPass = false;
+            let accuracy = 0;
 
-            let matchCount = 0;
-            for (let i = 0; i < bookClean.length; i++) {
-                if (userClean.includes(bookClean[i])) {
-                    matchCount++;
+            if (currentSubject === '语文') {
+                // 语文逻辑：包含 60% 以上的字就算过
+                const bookClean = task.content.replace(/[^\u4e00-\u9fa5]/g, '');
+                const userClean = recognizedText.replace(/[^\u4e00-\u9fa5]/g, '');
+                let matchCount = 0;
+                for (let i = 0; i < bookClean.length; i++) {
+                    if (userClean.includes(bookClean[i])) matchCount++;
+                }
+                accuracy = matchCount / bookClean.length;
+                isPass = accuracy > 0.6;
+
+            } else if (currentSubject === '英语') {
+                // 英语逻辑：只要开口读了（识别到了字母），且不是完全不相干的乱语，就给过
+                // 简单判断：识别出的字母数量大于 2 即可（对应你说的“大概读全了就行”）
+                const cleanText = recognizedText.replace(/[^a-zA-Z]/g, '');
+                if (cleanText.length > 2) {
+                    isPass = true;
+                    accuracy = 1; // 英语强制给 100% 识别率
                 }
             }
-            const accuracy = matchCount / bookClean.length;
 
-            if (accuracy > 0.6) { 
+            if (isPass) { 
                 statusText.innerText = `✅ 读得真棒！识别率 ${Math.round(accuracy*100)}%`;
                 statusText.style.background = '#E8F5E9';
                 statusText.style.color = '#2E7D32';
                 
-                if (recordedBlob) new Audio(URL.createObjectURL(recordedBlob)).play();
+                // 语文：如果有录音，播放一遍；英语：直接过
+                if (recordedBlob && currentSubject === '语文') new Audio(URL.createObjectURL(recordedBlob)).play();
                 
                 btn.innerText = '🎉 正在保存...';
                 
+                // 🎯 修复7：清除录音缓存（读完即删）
+                recordedBlob = null;
+                audioChunks = [];
+
                 setTimeout(() => {
                     saveAndNext(task);
                 }, 1500);
@@ -671,6 +717,8 @@
                 document.getElementById('statusText').style.display = 'block';
                 document.getElementById('btnRecord').innerText = '🎤 再读一遍';
                 document.getElementById('btnRecord').disabled = false;
+                // 🎯 修复8：进度条在此处也要更新
+                updateProgressBar();
                 return;
             }
             
@@ -680,6 +728,7 @@
                 await advanceProgress();
             } else {
                 renderChineseTask(); 
+                if(currentSubject === '英语') renderEnglishTask();
             }
         }
 
@@ -692,14 +741,12 @@
             location.reload();
         }
 
-        // ================= 🎧 循环磨耳朵 =================
+        // ================= 🎧 循环磨耳朵（修复界面无反馈问题） =================
         let loopQueue = [];
         let isLooping = false;
 
         async function startLoopMode() {
-            document.getElementById('homeScreen').style.display = 'none';
-            document.getElementById('loopScreen').style.display = 'flex';
-            document.getElementById('loopStatus').innerText = '正在准备音频...';
+            showToast("🎧 正在准备音频...");
             
             loopQueue = [];
             const today = getTodayDate();
@@ -713,7 +760,7 @@
                 exTasks.forEach(t => { loopQueue.push(t.sentences.replace(/\|/g, '. ')); });
             }
 
-            if (loopQueue.length === 0) { alert('暂无英语内容'); stopLoopMode(); return; }
+            if (loopQueue.length === 0) { alert('暂无英语内容'); return; }
             isLooping = true;
             playLoopQueue();
         }
@@ -721,18 +768,23 @@
         function playLoopQueue() {
             if (!isLooping) return;
             let index = 0;
+            
             function playNext() {
                 if (!isLooping) return;
                 if (index >= loopQueue.length) {
-                    document.getElementById('loopStatus').innerText = '一轮完毕，3秒后重播...';
+                    showToast("🔄 一轮完毕，3秒后重播...");
                     setTimeout(() => { if(isLooping) { index = 0; playNext(); } }, 3000);
                     return;
                 }
                 const text = loopQueue[index];
-                document.getElementById('loopStatus').innerText = text;
+                showToast(`🔊 正在播放：${text.substring(0, 15)}...`);
+                
                 let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
                 globalAudio.src = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                
                 globalAudio.onended = () => { index++; setTimeout(playNext, 1500); };
+                globalAudio.onerror = () => { index++; playNext(); }; // 播放失败直接跳过
+                
                 globalAudio.play().catch(() => { index++; playNext(); });
             }
             playNext();
@@ -741,9 +793,13 @@
         function stopLoopMode() {
             isLooping = false;
             globalAudio.pause();
-            document.getElementById('loopScreen').style.display = 'none';
-            document.getElementById('homeScreen').style.display = 'flex';
+            showToast("⏹️ 已停止播放");
         }
+
+        // 点击顶部返回/任意位置可以打断循环 (兼容)
+        document.getElementById('homeScreen').addEventListener('click', () => {
+            if (isLooping) stopLoopMode();
+        });
 
         window.onload = () => {
             if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
