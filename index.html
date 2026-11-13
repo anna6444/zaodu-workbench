@@ -14,6 +14,7 @@
             background-color: var(--bg); color: var(--text); margin: 0; padding: 15px; 
             display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box;
             touch-action: manipulation; -webkit-tap-highlight-color: transparent; 
+            overflow: hidden; /* 防止底层页面滚动 */
         }
         
         /* 登录 & 家长端 */
@@ -62,8 +63,9 @@
         .btn-loop { background: linear-gradient(135deg, #424242, #212121); height: 18%; font-size: 28px;}
         .big-btn span { font-size: 20px; font-weight: normal; margin-top: 10px; opacity: 0.9;}
 
-        /* 阅读页 */
-        #readingScreen { display: none; flex-direction: column; flex: 1; }
+        /* ================= 阅读页核心修改 ================= */
+        #readingScreen { display: none; flex-direction: column; flex: 1; height: 100vh; position: relative; box-sizing: border-box; padding-bottom: 100px; /* 给底部按钮留空间 */ }
+        
         .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px;}
         .btn-back { background: transparent; border: none; font-size: 22px; color: var(--pink-dark); font-weight: bold; cursor: pointer; }
         
@@ -72,23 +74,54 @@
         .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #F48FB1, #F06292); transition: width 0.5s ease; border-radius: 10px;}
         .progress-text { font-size: 16px; font-weight: bold; color: var(--pink-dark); margin-left: 10px;}
 
-        .focus-card { background: var(--card); border-radius: 32px; padding: 30px 20px; box-shadow: 0 12px 32px rgba(244,143,177,0.1); display: flex; flex-direction: column; flex: 1; position: relative;}
-        .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 20px; padding-bottom: 15px;}
+        .focus-card { background: var(--card); border-radius: 32px; padding: 20px; box-shadow: 0 12px 32px rgba(244,143,177,0.1); display: flex; flex-direction: column; flex: 1; position: relative; overflow: hidden; /* 让内部可以滚动 */}
+        .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 20px; padding-bottom: 15px; flex-shrink: 0;}
         
+        /* 🎯 内容区：允许上下滑动 */
         .focus-content { 
-            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; overflow-y: auto; padding: 10px;
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px; 
+            overflow-y: auto; 
+            padding: 10px;
+            padding-bottom: 20px;
         }
 
-        .line-block { text-align: center; cursor: pointer; padding: 8px 20px; border-radius: 12px; transition: all 0.1s; background: transparent; width: 100%; }
+        .line-block { 
+            text-align: center; 
+            cursor: pointer; 
+            padding: 8px 20px; 
+            border-radius: 12px; 
+            transition: all 0.1s; 
+            background: transparent; 
+            width: 100%;
+        }
         .line-block:active { background-color: var(--pink-light); transform: scale(0.98);}
         .line-pinyin { font-size: 20px; color: var(--pink-dark); margin-bottom: 5px; letter-spacing: 2px; opacity: 0.8;}
         .line-text { font-size: 42px; font-weight: bold; color: var(--text); line-height: 1.3; }
         
-        .bottom-action { margin-top: 20px; display: flex; flex-direction: row; gap: 20px; justify-content: center;}
-        .btn-record { background: #FFB74D; color: white; border: none; padding: 16px 40px; border-radius: 20px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 12px rgba(255,183,77,0.3);}
+        /* 🎯 底部按钮固定悬浮 */
+        .bottom-action { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            width: 100%; 
+            padding: 15px 20px 25px 20px; 
+            background: linear-gradient(to top, var(--bg) 70%, transparent); /* 渐变遮罩 */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        
+        .btn-record { background: #FFB74D; color: white; border: none; padding: 16px 40px; border-radius: 20px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 6px 12px rgba(255,183,77,0.3); width: 100%; max-width: 400px;}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
         
-        .status-text { font-size: 20px; font-weight: bold; text-align: center; padding: 12px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; margin-bottom: 15px;}
+        .status-text { font-size: 20px; font-weight: bold; text-align: center; padding: 12px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; margin-bottom: 10px; width: 100%; max-width: 400px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* 英语排版 */
@@ -97,13 +130,23 @@
         .en-trans { font-size: 20px; color: #888; margin-bottom: 20px; text-align: center;}
         
         #loadingMask { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,240,245,0.9); z-index: 998; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: var(--pink-dark);}
-        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 12px 24px; border-radius: 20px; font-size: 16px; z-index: 2000; display: none; white-space: nowrap; }
+
+        /* 🎯 手机端适配：如果屏幕窄，自动缩小字体 */
+        @media (max-width: 768px) {
+            .line-text { font-size: 32px; }
+            .line-pinyin { font-size: 16px; }
+            .en-line { font-size: 28px; }
+            .en-trans { font-size: 16px; }
+            .btn-record { font-size: 20px; padding: 12px 20px; }
+            .focus-title { font-size: 24px; }
+            .big-btn { font-size: 32px; }
+            .big-btn span { font-size: 16px; }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div id="toast"></div>
     <div id="loadingMask">🌸 正在识别中...</div>
 
     <div id="loginScreen">
@@ -117,20 +160,11 @@
 
     <div id="editModal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">修改课文</h3>
-                <button class="btn btn-cancel" style="padding:4px 8px;" onclick="closeModal()">关闭</button>
-            </div>
-            <div class="modal-label">标题：</div>
-            <input type="text" id="editTitle" class="modal-input">
-            <div class="modal-label">拼音：</div>
-            <textarea id="editPinyin" class="modal-input" style="height: 80px; resize:none;"></textarea>
-            <div class="modal-label">正文（汉字）：</div>
-            <textarea id="editContent" class="modal-textarea"></textarea>
-            <div class="modal-footer">
-                <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-                <button class="btn btn-confirm" onclick="saveTaskEdit()">💾 保存修改</button>
-            </div>
+            <div class="modal-header"><h3 id="modalTitle">修改课文</h3><button class="btn btn-cancel" style="padding:4px 8px;" onclick="closeModal()">关闭</button></div>
+            <div class="modal-label">标题：</div><input type="text" id="editTitle" class="modal-input">
+            <div class="modal-label">拼音：</div><textarea id="editPinyin" class="modal-input" style="height: 80px; resize:none;"></textarea>
+            <div class="modal-label">正文（汉字）：</div><textarea id="editContent" class="modal-textarea"></textarea>
+            <div class="modal-footer"><button class="btn btn-cancel" onclick="closeModal()">取消</button><button class="btn btn-confirm" onclick="saveTaskEdit()">💾 保存修改</button></div>
         </div>
     </div>
 
@@ -139,11 +173,7 @@
             <button class="btn btn-logout" onclick="logout()">退出</button>
             <h3>👩‍🏫 家长控制台</h3>
             <div class="admin-row">
-                <span>进度：第</span>
-                <input type="number" id="setWeek" value="1">
-                <span>周，第</span>
-                <input type="number" id="setDay" value="1">
-                <span>天</span>
+                <span>进度：第</span><input type="number" id="setWeek" value="1"><span>周，第</span><input type="number" id="setDay" value="1"><span>天</span>
                 <button class="btn btn-save" onclick="saveSettings()">修改</button>
             </div>
         </div>
@@ -159,21 +189,6 @@
             <button class="btn btn-blue" onclick="loadEditList()">刷新本周列表</button>
             <div class="edit-list" id="editListContainer"></div>
         </div>
-        
-        <!-- 临时加餐 -->
-        <div class="admin-panel" style="background:#E8F5E9; border:2px dashed #4CAF50;">
-            <h3 style="color:#2E7D32;">🍎 临时加餐（英语）</h3>
-            <p style="font-size:13px; color:#666; margin-top:0;">说明：用 <b>|</b> 分隔句子。</p>
-            <div class="modal-label">标题：</div>
-            <input type="text" id="extraTitle" class="modal-input" placeholder="今日加餐">
-            <div class="modal-label">英文句子 (用 | 隔开)：</div>
-            <input type="text" id="extraSentences" class="modal-input" placeholder="Good morning! | How are you?">
-            <div class="modal-label">中文翻译 (用 | 隔开，选填)：</div>
-            <input type="text" id="extraTrans" class="modal-input" placeholder="早上好！| 你好吗？">
-            <div class="modal-label">生效日期 (默认今天)：</div>
-            <input type="date" id="extraDate" class="modal-input">
-            <button class="btn btn-confirm" style="width:100%; background:#4CAF50; margin-top:10px;" onclick="addExtraTask()">➕ 添加到晨读列表</button>
-        </div>
     </div>
 
     <div id="homeScreen">
@@ -181,38 +196,28 @@
             <h1>🌸 每日晨读</h1>
             <p id="subtitle" style="font-weight:bold; color:#999; font-size:20px;">加载中...</p>
         </div>
-        <div class="big-btn btn-chinese" onclick="openReading('语文')">
-            📖 语文晨读
-            <span>点开进入大屏阅读</span>
-        </div>
-        <div class="big-btn btn-english" onclick="openReading('英语')">
-            🔤 英语复习
-            <span>Words & Phonics</span>
-        </div>
-        <div class="big-btn btn-loop" onclick="startLoopMode()">
-            🎧 循环磨耳朵
-        </div>
+        <div class="big-btn btn-chinese" onclick="openReading('语文')">📖 语文晨读<span>点开进入大屏阅读</span></div>
+        <div class="big-btn btn-english" onclick="openReading('英语')">🔤 英语复习<span>Words & Phonics</span></div>
+        <div class="big-btn btn-loop" onclick="startLoopMode()">🎧 循环磨耳朵</div>
         <button class="btn btn-logout" style="margin-top:20px; align-self:center;" onclick="logout()">退出登录</button>
     </div>
 
     <div id="readingScreen">
         <div class="top-nav">
             <button class="btn-back" onclick="backToHome()">← 返回</button>
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
             <div class="progress-text" id="progressText">0%</div>
         </div>
         
         <div class="focus-card">
             <div class="focus-title" id="focusTitle">加载中...</div>
             <div class="focus-content" id="focusContent"></div>
+        </div>
+
+        <!-- 🎯 按钮移出卡片，固定在底部 -->
+        <div class="bottom-action">
             <div class="status-text" id="statusText"></div>
-            <div class="bottom-action">
-                <button class="btn-record" id="btnRecord" onclick="toggleRecord()">
-                    🎤 开始录音跟读
-                </button>
-            </div>
+            <button class="btn-record" id="btnRecord" onclick="toggleRecord()">🎤 开始录音跟读</button>
         </div>
     </div>
 
@@ -232,34 +237,52 @@
         const CACHE_KEY_ZH = 'cache_zh_tasks';
         const CACHE_KEY_EN = 'cache_en_tasks';
 
-        // 🎯 终极音频方案：使用原生 TTS，100% 出声，抛弃不稳定的外链
+        // 发音引擎
+        let globalAudio = new Audio(); 
+        const synth = window.speechSynthesis;
+
         function speak(text, lang = 'zh-CN', event) {
             if (event) event.preventDefault(); 
+            globalAudio.pause();
+            globalAudio.currentTime = 0;
             if (window.speechSynthesis) window.speechSynthesis.cancel();
-            
-            const synth = window.speechSynthesis;
+
+            if (lang === 'en-US') {
+                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
+                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                globalAudio.src = audioUrl;
+                globalAudio.play().catch(err => fallbackSpeak(text, lang));
+            } else {
+                fallbackSpeak(text, lang);
+            }
+        }
+
+        function fallbackSpeak(text, lang) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            utterance.rate = (lang === 'en-US') ? 0.85 : 0.9;
-            
+            utterance.rate = (lang === 'en-US') ? 0.8 : 0.85;
             const voices = synth.getVoices();
             const targetVoice = voices.find(v => v.lang.includes(lang));
             if (targetVoice) utterance.voice = targetVoice;
-
             synth.speak(utterance);
+        }
+
+        // 后台静默预读
+        function preloadAudioCache(textList, lang) {
+            if (!('speechSynthesis' in window)) return;
+            textList.forEach(text => {
+                const cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
+                const utter = new SpeechSynthesisUtterance(cleanText);
+                utter.lang = lang;
+                utter.volume = 0; 
+                utter.rate = 10;  
+                synth.speak(utter);
+            });
         }
 
         function getTodayDate() {
             const d = new Date();
             return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-        }
-
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.display = 'block';
-            clearTimeout(window.toastTimer);
-            window.toastTimer = setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
 
         function handleLogin() {
@@ -289,7 +312,6 @@
                 document.getElementById('parentScreen').style.display = 'block';
                 document.getElementById('setWeek').value = currentWeek;
                 document.getElementById('setDay').value = currentDay;
-                document.getElementById('extraDate').value = new Date().toISOString().split('T')[0];
                 loadEditList(); loadHistory();
             } else {
                 document.getElementById('homeScreen').style.display = 'flex';
@@ -312,6 +334,7 @@
             }
         }
 
+        // 家长端逻辑
         async function saveSettings() {
             const w = parseInt(document.getElementById('setWeek').value);
             const d = parseInt(document.getElementById('setDay').value);
@@ -370,40 +393,10 @@
             btn.innerText = '💾 保存修改';
         }
 
-        async function addExtraTask() {
-            const title = document.getElementById('extraTitle').value.trim() || '今日加餐';
-            const sentences = document.getElementById('extraSentences').value.trim();
-            const trans = document.getElementById('extraTrans').value.trim();
-            const dateInput = document.getElementById('extraDate').value;
-
-            if (!sentences) { alert('请至少输入一句英文！'); return; }
-
-            let finalDate = getTodayDate(); 
-            if (dateInput) {
-                const parts = dateInput.split('-');
-                finalDate = `${parseInt(parts[0])}-${parseInt(parts[1])}-${parseInt(parts[2])}`;
-            }
-
-            const btn = document.querySelector('.btn-confirm[onclick="addExtraTask()"]');
-            btn.innerText = '⏳ 保存中...'; btn.disabled = true;
-
-            const { error } = await db.from('morning_english_extra').insert([{ 
-                unit_title: title, sentences: sentences, translation: trans, study_dates: finalDate, created_date: getTodayDate() 
-            }]);
-
-            if (error) { console.error(error); alert('保存失败！'); } 
-            else {
-                alert('✅ 加餐成功！'); document.getElementById('extraSentences').value = '';
-                localStorage.removeItem(CACHE_KEY_EN);
-            }
-            btn.innerText = '➕ 添加到晨读列表'; btn.disabled = false;
-        }
-
-        // ================= 孩子端 =================
+        // 孩子端逻辑
         function backToHome() {
             document.getElementById('readingScreen').style.display = 'none';
             document.getElementById('homeScreen').style.display = 'flex';
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
         }
 
         async function openReading(subject) {
@@ -446,32 +439,24 @@
                 renderChineseTask();
 
             } else if (subject === '英语') {
-                const today = getTodayDate();
-                const res1 = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
-                let engTasks = res1.data || [];
-                
-                const res2 = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
-                let exTasks = res2.data || [];
-                
-                const { data: todayRecords } = await db.from('morning_records').select('*').eq('read_date', today);
-                const recordMap = {};
-                if(todayRecords) todayRecords.forEach(r => recordMap[r.task_id] = r);
+                let cachedEn = localStorage.getItem(CACHE_KEY_EN);
+                let enData = cachedEn ? JSON.parse(cachedEn) : null;
+                let engTasks = enData ? enData.main : null;
+                let exTasks = enData ? enData.extra : null;
 
-                currentExtraTasks = [];
-                exTasks.forEach(ex => {
-                    let targetCount = 1; 
-                    let currentCount = recordMap[ex.id] ? recordMap[ex.id].read_count : 0;
-                    if (currentCount < targetCount) {
-                        ex._targetCount = targetCount;
-                        ex._currentCount = currentCount;
-                        ex._recordId = recordMap[ex.id] ? recordMap[ex.id].id : null;
-                        currentExtraTasks.push(ex);
-                    }
-                });
-
-                todayTasks = engTasks; 
-                if (todayTasks.length === 0 && currentExtraTasks.length === 0) { 
-                    alert(`🎉 今天的英语任务全部完成啦！`); backToHome(); return; 
+                if (!engTasks) {
+                    const today = getTodayDate();
+                    const res1 = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
+                    const res2 = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
+                    engTasks = res1.data;
+                    exTasks = res2.data;
+                }
+                currentExtraTasks = exTasks || [];
+                if (!engTasks || engTasks.length === 0) { 
+                    if (currentExtraTasks.length === 0) { alert(`暂无英语内容`); backToHome(); return; }
+                    else { todayTasks = []; }
+                } else {
+                    todayTasks = engTasks;
                 }
                 currentTaskIndex = 0;
                 renderEnglishTask();
@@ -485,58 +470,73 @@
             document.getElementById('progressText').innerText = percent + '%';
         }
 
+        // 渲染语文 
         function renderChineseTask() {
             if(currentTaskIndex >= todayTasks.length) return;
             const task = todayTasks[currentTaskIndex];
             document.getElementById('focusTitle').innerText = task.title;
             updateProgressBar();
 
+            // 滚动回顶部
+            document.getElementById('focusContent').scrollTop = 0;
+
             let sentences = task.content.split(/(?<=[。！？；])/g).filter(s => s.trim().length > 0);
             let pinyins = task.pinyin ? task.pinyin.split(/(?<=[.?!;])/g).filter(s => s.trim().length > 0) : [];
 
             let html = '';
+            let textToPreload = [];
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
+                textToPreload.push(clean);
                 const py = pinyins[index] ? pinyins[index].trim() : '';
-                html += `<div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
+                html += `
+                <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
                     ${py ? `<div class="line-pinyin">${py}</div>` : ''}
                     <div class="line-text">${clean}</div>
                 </div>`;
             });
             document.getElementById('focusContent').innerHTML = html;
             resetBottomButtons();
+            preloadAudioCache(textToPreload, 'zh-CN');
         }
 
         function renderEnglishTask() {
             let html = '';
+            let textToPreload = [];
             if (todayTasks.length > 0) {
                 const task = todayTasks[currentTaskIndex];
                 document.getElementById('focusTitle').innerText = task.unit_title;
                 updateProgressBar();
                 html += generateEnglishHtml(task, false);
-            } else {
-                document.getElementById('progressBar').style.width = '100%';
-                document.getElementById('progressText').innerText = '复习';
+                task.sentences.split('|').forEach(s => textToPreload.push(s.trim()));
             }
 
             currentExtraTasks.forEach((ex, idx) => {
-                html += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 加餐 (第 ${ex._currentCount + 1}/${ex._targetCount} 遍)：${ex.unit_title}</div>`;
+                html += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 复习：${ex.unit_title}</div>`;
                 html += generateEnglishHtml(ex, true);
+                ex.sentences.split('|').forEach(s => textToPreload.push(s.trim()));
             });
+            
             document.getElementById('focusContent').innerHTML = html;
+            document.getElementById('focusContent').scrollTop = 0;
             resetBottomButtons();
+            preloadAudioCache(textToPreload, 'en-US');
         }
 
         function generateEnglishHtml(task, isExtra) {
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
+            const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : [];
             const fullText = sentenceList.join('. ');
 
             let res = `<div style="width:100%;">`;
             res += `<button class="btn-record" style="width:100%; background:#81D4FA; margin-bottom:20px;" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>`;
+            
             sentenceList.forEach((s, i) => {
-                res += `<div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
-                        <div class="en-trans">${transList[i] || ''}</div>`;
+                res += `
+                    <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
+                    <div class="en-trans">${transList[i] || ''}</div>
+                `;
             });
             res += `</div>`;
             return res;
@@ -555,31 +555,29 @@
             isRecognizing = false;
         }
 
-        // ================= 🎯 核心修复：录音与识别引擎 =================
+        // 语音识别与录音
         let mediaRecorder, audioChunks = [], isRecording = false;
+        let recordedBlob = null; 
         let recognition = null;
         let isRecognizing = false;
         let recognizedText = "";
 
-        function initSpeechRecognition(langCode) {
+        function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("您的浏览器不支持语音识别，请用Safari或Chrome打开！");
-                return null;
-            }
+            if (!SpeechRecognition) { alert("请用Safari或Chrome打开！"); return null; }
             const rec = new SpeechRecognition();
-            rec.lang = langCode; 
+            rec.lang = 'zh-CN';
             rec.continuous = true;
             rec.interimResults = true;
-
             rec.onresult = (event) => {
+                let interimTranscript = '';
                 let finalTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    finalTranscript += event.results[i][0].transcript;
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                    else interimTranscript += event.results[i][0].transcript;
                 }
-                recognizedText = finalTranscript;
+                recognizedText = finalTranscript + interimTranscript;
             };
-            rec.onerror = (e) => { console.warn("识别出错:", e.error); };
             return rec;
         }
 
@@ -588,35 +586,26 @@
             const statusText = document.getElementById('statusText');
 
             if (!isRecording) {
-                if (window.speechSynthesis) window.speechSynthesis.cancel();
                 recognizedText = ""; 
-                
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     mediaRecorder = new MediaRecorder(stream);
                     audioChunks = [];
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
-                    mediaRecorder.onstop = () => { stream.getTracks().forEach(track => track.stop()); };
+                    mediaRecorder.onstop = () => {
+                        recordedBlob = new Blob(audioChunks, { type: 'audio/webm' }); 
+                        stream.getTracks().forEach(track => track.stop());
+                    };
                     mediaRecorder.start();
 
-                    // 每次录音前彻底销毁旧的引擎，防止卡死
-                    if (recognition) { recognition.abort(); recognition = null; }
-                    
-                    const langCode = currentSubject === '英语' ? 'en-US' : 'zh-CN';
-                    recognition = initSpeechRecognition(langCode);
-                    if (recognition) {
-                        recognition.start();
-                        isRecognizing = true;
-                    }
+                    recognition = initSpeechRecognition();
+                    if (recognition) { recognition.start(); isRecognizing = true; }
 
                     isRecording = true;
                     btn.innerText = '🛑 读完请点结束';
                     btn.classList.add('recording');
                     statusText.innerText = '正在聆听...请大声朗读';
                     statusText.style.display = 'block';
-                    statusText.style.background = '#FFF8E1';
-                    statusText.style.color = '#E65100';
-
                 } catch (err) { alert('无法访问麦克风！请检查权限。'); }
             } else {
                 btn.innerText = '⏳ 识别中...';
@@ -624,10 +613,10 @@
                 btn.disabled = true;
                 
                 if (recognition && isRecognizing) { recognition.stop(); isRecognizing = false; }
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') { mediaRecorder.stop(); }
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
                 isRecording = false;
 
-                setTimeout(() => { checkReading(); }, 800);
+                setTimeout(() => { checkReading(); }, 1000);
             }
         }
 
@@ -636,120 +625,57 @@
             const btn = document.getElementById('btnRecord');
             btn.disabled = false;
 
-            if (!recognizedText || recognizedText.trim().length < 1) {
+            if (!recognizedText || recognizedText.trim().length < 2) {
                 statusText.innerText = '❌ 没听清哦，请再试一次~';
-                statusText.style.background = '#FFEBEE';
-                statusText.style.color = '#D32F2F';
+                statusText.style.background = '#FFEBEE'; statusText.style.color = '#D32F2F';
                 btn.innerText = '🎤 重新开始';
                 return;
             }
 
-            let task = null;
-            let isExtraTask = false;
+            const task = todayTasks[currentTaskIndex];
+            const bookClean = task.content.replace(/[^\u4e00-\u9fa5]/g, '');
+            const userClean = recognizedText.replace(/[^\u4e00-\u9fa5]/g, '');
 
-            if (currentSubject === '语文') {
-                task = todayTasks[currentTaskIndex];
-            } else {
-                if (currentTaskIndex < todayTasks.length) {
-                    task = todayTasks[currentTaskIndex];
-                } else {
-                    task = currentExtraTasks.find(ex => ex._currentCount < ex._targetCount);
-                    isExtraTask = true;
-                }
+            let matchCount = 0;
+            for (let i = 0; i < bookClean.length; i++) {
+                if (userClean.includes(bookClean[i])) matchCount++;
             }
-            if (!task) return;
+            const accuracy = matchCount / bookClean.length;
 
-            let isPass = false;
-            let accuracy = 0;
-
-            if (currentSubject === '语文') {
-                const bookClean = task.content.replace(/[^\u4e00-\u9fa5]/g, '');
-                const userClean = recognizedText.replace(/[^\u4e00-\u9fa5]/g, '');
-                let matchCount = 0;
-                for (let i = 0; i < bookClean.length; i++) {
-                    if (userClean.includes(bookClean[i])) matchCount++;
-                }
-                accuracy = matchCount / bookClean.length;
-                isPass = accuracy > 0.7; 
-            } else {
-                const targetText = task.sentences.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                const userText = recognizedText.replace(/[^a-zA-Z]/g, '').toLowerCase();
-                if (userText.length > targetText.length * 0.3) {
-                    isPass = true;
-                    accuracy = 1; 
-                }
-            }
-
-            if (isPass) { 
+            if (accuracy > 0.6) { 
                 statusText.innerText = `✅ 读得真棒！识别率 ${Math.round(accuracy*100)}%`;
-                statusText.style.background = '#E8F5E9';
-                statusText.style.color = '#2E7D32';
+                statusText.style.background = '#E8F5E9'; statusText.style.color = '#2E7D32';
+                if (recordedBlob) new Audio(URL.createObjectURL(recordedBlob)).play();
                 btn.innerText = '🎉 正在保存...';
-                
-                setTimeout(() => {
-                    saveAndNext(task, isExtraTask);
-                }, 1000);
-
+                setTimeout(() => { saveAndNext(task); }, 1500);
             } else {
                 statusText.innerText = `❌ 感觉有点不对哦，再读一遍试试？`;
-                statusText.style.background = '#FFEBEE';
-                statusText.style.color = '#D32F2F';
+                statusText.style.background = '#FFEBEE'; statusText.style.color = '#D32F2F';
                 btn.innerText = '🎤 重新开始';
             }
         }
 
-        async function saveAndNext(task, isExtraTask = false) {
+        async function saveAndNext(task) {
             const today = getTodayDate();
             const newCount = task._currentCount + 1;
-            
             if (task._recordId) await db.from('morning_records').update({ read_count: newCount }).eq('id', task._recordId);
             else await db.from('morning_records').insert([{ task_id: task.id, read_count: newCount, read_date: today }]);
 
-            task._currentCount = newCount;
-            const statusText = document.getElementById('statusText');
-
-            if (currentSubject === '语文') {
-                let totalRequired = todayTasks.reduce((sum, t) => sum + t._targetCount, 0);
-                let totalDone = todayTasks.reduce((sum, t) => sum + t._currentCount, 0);
-                let percent = Math.round((totalDone / totalRequired) * 100);
-                document.getElementById('progressBar').style.width = percent + '%';
-                document.getElementById('progressText').innerText = percent + '%';
-
-                if (newCount < task._targetCount) {
-                    statusText.innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
-                    statusText.style.display = 'block';
-                    document.getElementById('btnRecord').innerText = '🎤 再读一遍';
-                    document.getElementById('btnRecord').disabled = false;
-                    return;
-                }
-                
-                currentTaskIndex++;
-                if (currentTaskIndex >= todayTasks.length) {
-                    await advanceProgress();
-                } else {
-                    renderChineseTask(); 
-                }
+            if (newCount < task._targetCount) {
+                task._currentCount = newCount;
+                document.getElementById('statusText').innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
+                document.getElementById('statusText').style.display = 'block';
+                document.getElementById('btnRecord').innerText = '🎤 再读一遍';
+                document.getElementById('btnRecord').disabled = false;
+                return;
+            }
+            
+            currentTaskIndex++;
+            if (currentTaskIndex >= todayTasks.length) {
+                updateProgressBar();
+                await advanceProgress();
             } else {
-                if (!isExtraTask) {
-                    document.getElementById('progressBar').style.width = '100%';
-                    document.getElementById('progressText').innerText = '100%';
-                    currentTaskIndex++;
-                }
-                
-                if (isExtraTask && newCount < task._targetCount) {
-                    statusText.innerText = `还需读 ${task._targetCount - newCount} 遍哦。`;
-                    statusText.style.display = 'block';
-                    document.getElementById('btnRecord').innerText = '🎤 再读一遍';
-                    document.getElementById('btnRecord').disabled = false;
-                    return;
-                }
-
-                if (currentTaskIndex >= todayTasks.length && currentExtraTasks.every(ex => ex._currentCount >= ex._targetCount)) {
-                    alert(`🎉 太棒了！英语任务全部完成！`);
-                    backToHome();
-                } else {
-                    renderEnglishTask(); 
-                }
+                renderChineseTask(); 
             }
         }
 
@@ -758,86 +684,60 @@
             let newDay = currentDay + 1;
             if (newDay > 7) { newWeek = currentWeek + 1; newDay = 1; }
             await db.from('morning_settings').update({ current_week: newWeek, current_day: newDay }).eq('id', 1);
-            alert(`🎉 太棒了！语文任务全部完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
+            alert(`🎉 太棒了！任务全部完成！\n已解锁：第 ${newWeek} 周 · 第 ${newDay} 天`);
             location.reload();
         }
 
-        // ================= 🎧 循环磨耳朵（彻底修复无声音） =================
+        // 循环磨耳朵
         let loopQueue = [];
         let isLooping = false;
-        let currentLoopIndex = 0;
 
         async function startLoopMode() {
-            if (isLooping) { stopLoopMode(); return; }
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('loopScreen').style.display = 'flex';
+            document.getElementById('loopStatus').innerText = '正在准备音频...';
             
-            // iOS 必须要在点击事件里先激活一次发声，否则后面都是哑巴
-            let wakeUp = new SpeechSynthesisUtterance(" ");
-            window.speechSynthesis.speak(wakeUp);
-
-            showToast("🎧 正在准备音频...");
             loopQueue = [];
             const today = getTodayDate();
 
             const { data: engTasks } = await db.from('morning_english').select('*').eq('day_index', currentDay).limit(1);
-            if (engTasks && engTasks.length > 0) {
-                loopQueue.push(engTasks[0].sentences.replace(/\|/g, '. '));
-            }
+            if (engTasks && engTasks.length > 0) loopQueue.push(engTasks[0].sentences.replace(/\|/g, '. '));
             const { data: exTasks } = await db.from('morning_english_extra').select('*').like('study_dates', `%${today}%`);
-            if (exTasks) {
-                exTasks.forEach(t => { loopQueue.push(t.sentences.replace(/\|/g, '. ')); });
-            }
+            if (exTasks) exTasks.forEach(t => { loopQueue.push(t.sentences.replace(/\|/g, '. ')); });
 
-            if (loopQueue.length === 0) { alert('暂无英语内容'); return; }
+            if (loopQueue.length === 0) { alert('暂无英语内容'); stopLoopMode(); return; }
             isLooping = true;
-            currentLoopIndex = 0;
-            playNextLoopAudio();
+            playLoopQueue();
         }
 
-        function playNextLoopAudio() {
+        function playLoopQueue() {
             if (!isLooping) return;
-            
-            if (currentLoopIndex >= loopQueue.length) {
-                showToast("🔄 一轮完毕，3秒后重播...");
-                setTimeout(() => { if(isLooping) { currentLoopIndex = 0; playNextLoopAudio(); } }, 3000);
-                return;
-            }
-
-            const text = loopQueue[currentLoopIndex];
-            showToast(`🔊 正在播放：${text.substring(0, 15)}...`);
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.85; 
-            
-            utterance.onend = () => { 
+            let index = 0;
+            function playNext() {
                 if (!isLooping) return;
-                currentLoopIndex++; 
-                setTimeout(playNextLoopAudio, 1000); 
-            };
-            utterance.onerror = () => {
-                if (!isLooping) return;
-                currentLoopIndex++; 
-                setTimeout(playNextLoopAudio, 1000);
+                if (index >= loopQueue.length) {
+                    document.getElementById('loopStatus').innerText = '一轮完毕，3秒后重播...';
+                    setTimeout(() => { if(isLooping) { index = 0; playNext(); } }, 3000);
+                    return;
+                }
+                const text = loopQueue[index];
+                document.getElementById('loopStatus').innerText = text;
+                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
+                globalAudio.src = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                globalAudio.onended = () => { index++; setTimeout(playNext, 1500); };
+                globalAudio.play().catch(() => { index++; playNext(); });
             }
-
-            window.speechSynthesis.speak(utterance);
+            playNext();
         }
 
         function stopLoopMode() {
             isLooping = false;
-            window.speechSynthesis.cancel();
-            showToast("⏹️ 已停止播放");
+            globalAudio.pause();
+            document.getElementById('loopScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'flex';
         }
 
-        // 点击主页能打断循环
-        document.getElementById('homeScreen').addEventListener('click', (e) => {
-            if (isLooping && !e.target.classList.contains('btn-loop')) {
-                stopLoopMode();
-            }
-        });
-
         window.onload = () => {
-            // 预热语音引擎
             if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
             if (userRole) initApp();
         };
