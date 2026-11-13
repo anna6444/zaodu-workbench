@@ -72,22 +72,23 @@
         .progress-text { font-size: 16px; font-weight: bold; color: var(--pink-dark); margin-left: 10px;}
 
         .focus-card { background: var(--card); border-radius: 32px; margin: 0 15px; padding: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
-        .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 15px; flex-shrink: 0;}
         
-        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px;}
+        .focus-header { flex-shrink: 0; margin-bottom: 10px;}
+        .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 10px; }
+        
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; gap: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px;}
 
         .line-block { text-align: center; cursor: pointer; padding: 8px 20px; border-radius: 12px; transition: all 0.1s; width: 100%; }
         .line-block:active { background-color: var(--pink-light); transform: scale(0.98);}
         .line-pinyin { font-size: 20px; color: var(--pink-dark); margin-bottom: 5px; letter-spacing: 2px; opacity: 0.8;}
         .line-text { font-size: 42px; font-weight: bold; color: var(--text); line-height: 1.3; }
         
-        .bottom-action { padding: 10px 20px 25px 20px; background: linear-gradient(to top, var(--bg) 80%, transparent); display: flex; flex-direction: column; align-items: center; }
+        .bottom-action { padding: 10px 20px 25px 20px; background: linear-gradient(to top, var(--bg) 80%, transparent); display: flex; flex-direction: column; align-items: center; z-index: 10;}
         .btn-record { background: #FFB74D; color: white; border: none; padding: 16px 40px; border-radius: 20px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; width: 100%; max-width: 400px; box-shadow: 0 6px 12px rgba(255,183,77,0.3);}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
         .status-text { font-size: 18px; font-weight: bold; text-align: center; padding: 10px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; margin-bottom: 10px; width: 100%; max-width: 400px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* 英语专属排版 */
         .en-line { font-size: 38px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; text-align: center; padding: 10px; border-radius: 16px;}
         .en-line:active { background-color: var(--pink-light); }
         .en-trans { font-size: 18px; color: #888; margin-bottom: 15px; text-align: center;}
@@ -97,6 +98,22 @@
         .word-card:active { transform: scale(0.95); background: #FFECB3; }
         .word-card span.emoji { font-size: 28px; }
 
+        .btn-play-all { width: 100%; padding: 12px; background: #81D4FA; color: white; border: none; border-radius: 16px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(129,212,250,0.3);}
+
+        /* 🎯 新增：音频预加载遮罩层 */
+        #audioLoadingMask {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 240, 245, 0.85); z-index: 2000;
+            flex-direction: column; justify-content: center; align-items: center;
+            color: var(--pink-dark); font-size: 20px; font-weight: bold;
+        }
+        .loader {
+            border: 6px solid #f3f3f3; border-top: 6px solid var(--pink-dark);
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         @media (max-width: 768px) {
             .line-text { font-size: 32px; }
             .en-line { font-size: 28px; }
@@ -104,11 +121,18 @@
             .btn-record { font-size: 20px; padding: 14px; }
             .big-btn { font-size: 32px; height: 25vh;}
             .word-card { font-size: 20px; }
+            .focus-title { font-size: 26px; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+    <!-- 🎯 音频下载遮罩 -->
+    <div id="audioLoadingMask">
+        <div class="loader"></div>
+        <div>正在下载纯正真人发音...</div>
+    </div>
 
     <div id="loginScreen" class="page-container">
         <div class="login-box">
@@ -171,7 +195,11 @@
         </div>
         
         <div class="focus-card">
-            <div class="focus-title" id="focusTitle">加载中...</div>
+            <div class="focus-header">
+                <div class="focus-title" id="focusTitle">加载中...</div>
+                <button id="btnPlayAll" class="btn-play-all" style="display:none;" onclick="playFullText()">▶️ 播放全文朗读</button>
+            </div>
+            
             <div class="focus-content" id="focusContent"></div>
         </div>
 
@@ -193,6 +221,10 @@
         let editingTaskId = null;
         let currentSubject = '语文'; 
         let currentExtraTasks = [];
+        let currentFullText = ""; 
+        
+        // 🎯 用于缓存已下载的音频 URL
+        let preloadedAudioMap = {};
 
         const CACHE_KEY_ZH = 'cache_zh_tasks';
         const CACHE_KEY_EN = 'cache_en_tasks';
@@ -203,23 +235,27 @@
 
         function speak(text, lang = 'zh-CN', event) {
             if (event) event.preventDefault(); 
+            
             globalAudio.pause();
-            globalAudio.currentTime = 0;
+            globalAudio.src = ''; 
+            globalAudio = new Audio();
+
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                // 🎯 使用百度翻译的真人发音接口，国内速度极快，绝对不会被拦截
-                let cleanText = text.replace(/[^\x00-\x7F]/g, "").trim(); // 只保留英文字符
+                let cleanText = text.replace(/[^\x00-\x7F]/g, "").trim(); 
                 if(!cleanText) return;
                 
-                // type=1 是英音，type=2 是美音 (这里用美音)
-                const audioUrl = `https://fanyi.baidu.com/gettts?lan=en&text=${encodeURIComponent(cleanText)}&spd=3&source=web`;
-                
-                globalAudio.src = audioUrl;
-                globalAudio.play().catch(err => {
-                    console.log('百度发音失败，降级为慢速机器音', err);
-                    fallbackSpeak(text, lang);
-                });
+                // 🎯 核心：如果之前预加载过这个文本，直接用！不用再请求网络
+                if (preloadedAudioMap[cleanText]) {
+                    globalAudio.src = preloadedAudioMap[cleanText];
+                    globalAudio.play().catch(err => fallbackSpeak(text, lang));
+                } else {
+                    // 如果没预加载到，现场请求
+                    const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                    globalAudio.src = audioUrl;
+                    globalAudio.play().catch(err => fallbackSpeak(text, lang));
+                }
             } else {
                 fallbackSpeak(text, lang);
             }
@@ -228,7 +264,6 @@
         function fallbackSpeak(text, lang) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            // 🎯 机器音全部降到 0.5 极慢速
             utterance.rate = 0.5; 
             const voices = synth.getVoices();
             const targetVoice = voices.find(v => v.lang.includes(lang));
@@ -236,14 +271,40 @@
             synth.speak(utterance);
         }
 
-        function preloadAudioCache(textList, lang) {
-            if (!('speechSynthesis' in window)) return;
-            textList.forEach(text => {
-                const cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
-                const utter = new SpeechSynthesisUtterance(cleanText);
-                utter.lang = lang; utter.volume = 0; utter.rate = 10;  
-                synth.speak(utter);
+        // 🎯 核心黑科技：预加载真实音频
+        async function preloadRealAudios(textArray) {
+            // 如果没有需要预加载的，直接跳过
+            if (!textArray || textArray.length === 0) return;
+
+            document.getElementById('audioLoadingMask').style.display = 'flex';
+
+            const fetchPromises = textArray.map(async (text) => {
+                let cleanText = text.replace(/[^\x00-\x7F]/g, "").trim(); 
+                if(!cleanText || preloadedAudioMap[cleanText]) return; // 已经缓存过了
+                
+                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                try {
+                    // 请求并下载音频文件为 Blob
+                    const response = await fetch(audioUrl);
+                    const blob = await response.blob();
+                    const localUrl = URL.createObjectURL(blob); // 生成本地秒播链接
+                    preloadedAudioMap[cleanText] = localUrl;
+                } catch (e) {
+                    console.log("下载音频失败:", text);
+                }
             });
+
+            // 等待所有音频下载完（或者超时 1.5 秒强退，防止孩子等太久）
+            await Promise.race([
+                Promise.all(fetchPromises),
+                new Promise(resolve => setTimeout(resolve, 1500))
+            ]);
+
+            document.getElementById('audioLoadingMask').style.display = 'none';
+        }
+
+        function playFullText() {
+            if (currentFullText) speak(currentFullText, 'en-US');
         }
 
         function getTodayDate() {
@@ -373,6 +434,7 @@
             document.getElementById('focusContent').innerHTML = '';
             document.getElementById('statusText').style.display = 'none';
             document.getElementById('btnRecord').style.display = 'none';
+            document.getElementById('btnPlayAll').style.display = 'none'; 
 
             if (subject === '语文') {
                 let cachedZh = localStorage.getItem(CACHE_KEY_ZH);
@@ -439,6 +501,8 @@
             if(currentTaskIndex >= todayTasks.length) return;
             const task = todayTasks[currentTaskIndex];
             document.getElementById('focusTitle').innerText = task.title;
+            document.getElementById('btnPlayAll').style.display = 'none'; 
+            
             updateProgressBar();
             document.getElementById('focusContent').scrollTop = 0;
 
@@ -446,10 +510,8 @@
             let pinyins = task.pinyin ? task.pinyin.split(/(?<=[.?!;])/g).filter(s => s.trim().length > 0) : [];
 
             let html = '';
-            let textToPreload = [];
             sentences.forEach((sentence, index) => {
                 const clean = sentence.trim(); if(!clean) return;
-                textToPreload.push(clean);
                 const py = pinyins[index] ? pinyins[index].trim() : '';
                 html += `
                 <div class="line-block" onclick="speak('${clean.replace(/'/g, "\\'")}', 'zh-CN', event)">
@@ -459,42 +521,45 @@
             });
             document.getElementById('focusContent').innerHTML = html;
             resetBottomButtons();
-            preloadAudioCache(textToPreload, 'zh-CN');
         }
 
-        // 🎯 英语渲染 (包含单词卡片)
-        function renderEnglishTask() {
+        // 🎯 英语渲染 (触发音频预加载)
+        async function renderEnglishTask() {
             let html = '';
             let textToPreload = [];
             if (todayTasks.length > 0) {
                 const task = todayTasks[currentTaskIndex];
                 document.getElementById('focusTitle').innerText = task.unit_title;
+                document.getElementById('btnPlayAll').style.display = 'block'; 
                 updateProgressBar();
                 html += generateEnglishHtml(task, false);
                 task.sentences.split('|').forEach(s => textToPreload.push(s.trim()));
+                if(task.words) task.words.split(',').forEach(w => textToPreload.push(w.trim()));
             }
 
             currentExtraTasks.forEach((ex, idx) => {
                 html += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">✨ 复习：${ex.unit_title}</div>`;
                 html += generateEnglishHtml(ex, true);
                 ex.sentences.split('|').forEach(s => textToPreload.push(s.trim()));
+                if(ex.words) ex.words.split(',').forEach(w => textToPreload.push(w.trim()));
             });
             
             document.getElementById('focusContent').innerHTML = html;
             document.getElementById('focusContent').scrollTop = 0;
             resetBottomButtons();
-            preloadAudioCache(textToPreload, 'en-US');
+
+            // 🎯 核心：在此处发起预加载！
+            await preloadRealAudios(textToPreload);
         }
 
         function generateEnglishHtml(task, isExtra) {
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
-            const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : []; // 🎯 获取单词数组
-            const fullText = sentenceList.join('. ');
+            const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : []; 
+            
+            if(!isExtra) currentFullText = sentenceList.join('. ');
 
             let res = `<div style="width:100%;">`;
-            res += `<button class="btn-record" style="width:100%; background:#81D4FA; margin-bottom:20px;" onclick="speak('${fullText.replace(/'/g, "\\'")}', 'en-US', event)">▶️ 播放全文朗读</button>`;
-            
             sentenceList.forEach((s, i) => {
                 res += `
                     <div class="en-line" onclick="speak('${s.replace(/'/g, "\\'")}', 'en-US', event)">${s}</div>
@@ -502,7 +567,6 @@
                 `;
             });
             
-            // 🎯 渲染单词卡片
             if(wordsArray.length > 0) {
                 res += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">💡 重点单词</div>`;
                 res += `<div class="word-grid">`;
