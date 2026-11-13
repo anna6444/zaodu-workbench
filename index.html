@@ -4,34 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>🌸 晨读小花园</title>
-    
-    <!-- 🎯 PWA 必备配置：让网页像 App 一样安装到桌面 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="晨读小花园">
     <meta name="theme-color" content="#FFF0F5">
-
     <style>
         :root {
             --bg: #FFF0F5; --card: #FFFFFF; --pink-dark: #F48FB1; --pink-light: #FCE4EC;
             --text: #4A4A4A; --subtext: #9E9E9E; --blue: #81D4FA; --danger: #f44336;
         }
+        html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
         
-        /* 🎯 锁定页面不乱动 */
-        html, body {
-            margin: 0; padding: 0; height: 100%; overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg); color: var(--text); 
-            touch-action: manipulation; -webkit-tap-highlight-color: transparent; 
-            -webkit-user-select: none; user-select: none;
-        }
-        
-        /* 统一的页面容器 */
-        .page-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; box-sizing: border-box; padding: 15px;
-            overflow-y: auto;
-        }
+        .page-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; padding: 15px; overflow-y: auto; }
 
         /* 登录 & 家长端 */
         #loginScreen { z-index: 999; justify-content: center; align-items: center; }
@@ -41,7 +25,6 @@
         .login-box input:focus { border-color: var(--pink-dark); }
         .login-btn { width: 100%; padding: 12px; background: var(--pink-dark); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; }
 
-        /* 其他组件保持一致 */
         .admin-panel { background: #FFF8E1; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 2px dashed #FFCA28; }
         .admin-panel h3 { margin-top: 0; color: #E65100; }
         .admin-row { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;}
@@ -88,57 +71,45 @@
         .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #F48FB1, #F06292); transition: width 0.5s ease; border-radius: 10px;}
         .progress-text { font-size: 16px; font-weight: bold; color: var(--pink-dark); margin-left: 10px;}
 
-        /* 专注卡片区域 */
         .focus-card { background: var(--card); border-radius: 32px; margin: 0 15px; padding: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         .focus-title { font-size: 32px; font-weight: bold; color: var(--pink-dark); text-align: center; margin-bottom: 15px; flex-shrink: 0;}
         
-        /* 🎯 内容区，只在这个区域滚动 */
-        .focus-content { 
-            flex: 1; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 15px; 
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 20px;
-        }
+        .focus-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 20px;}
 
         .line-block { text-align: center; cursor: pointer; padding: 8px 20px; border-radius: 12px; transition: all 0.1s; width: 100%; }
         .line-block:active { background-color: var(--pink-light); transform: scale(0.98);}
         .line-pinyin { font-size: 20px; color: var(--pink-dark); margin-bottom: 5px; letter-spacing: 2px; opacity: 0.8;}
         .line-text { font-size: 42px; font-weight: bold; color: var(--text); line-height: 1.3; }
         
-        /* 底部固定操作区 */
-        .bottom-action { 
-            padding: 10px 20px 25px 20px; 
-            background: linear-gradient(to top, var(--bg) 80%, transparent);
-            display: flex; flex-direction: column; align-items: center;
-        }
-        
+        .bottom-action { padding: 10px 20px 25px 20px; background: linear-gradient(to top, var(--bg) 80%, transparent); display: flex; flex-direction: column; align-items: center; }
         .btn-record { background: #FFB74D; color: white; border: none; padding: 16px 40px; border-radius: 20px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; width: 100%; max-width: 400px; box-shadow: 0 6px 12px rgba(255,183,77,0.3);}
         .btn-record.recording { background: var(--danger); animation: pulse 1s infinite; }
         .status-text { font-size: 18px; font-weight: bold; text-align: center; padding: 10px; border-radius: 12px; background: #FFF8E1; color: #E65100; display: none; margin-bottom: 10px; width: 100%; max-width: 400px;}
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        .en-line { font-size: 38px; font-weight: bold; color: #333; margin-bottom: 10px; cursor: pointer; text-align: center; padding: 10px; border-radius: 16px;}
+        /* 英语专属排版 */
+        .en-line { font-size: 38px; font-weight: bold; color: #333; margin-bottom: 5px; cursor: pointer; text-align: center; padding: 10px; border-radius: 16px;}
         .en-line:active { background-color: var(--pink-light); }
-        .en-trans { font-size: 20px; color: #888; margin-bottom: 20px; text-align: center;}
+        .en-trans { font-size: 18px; color: #888; margin-bottom: 15px; text-align: center;}
+        
+        .word-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; width:100%;}
+        .word-card { background: #FFFDE7; border: 2px solid #FFCA28; border-radius: 20px; padding: 8px 16px; font-size: 24px; font-weight: bold; color: #333; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: transform 0.1s;}
+        .word-card:active { transform: scale(0.95); background: #FFECB3; }
+        .word-card span.emoji { font-size: 28px; }
 
-        /* 手机端适配 */
         @media (max-width: 768px) {
             .line-text { font-size: 32px; }
             .en-line { font-size: 28px; }
+            .en-trans { font-size: 16px; }
             .btn-record { font-size: 20px; padding: 14px; }
             .big-btn { font-size: 32px; height: 25vh;}
+            .word-card { font-size: 20px; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <!-- 登录 -->
     <div id="loginScreen" class="page-container">
         <div class="login-box">
             <h2>🌸 晨读小花园</h2>
@@ -148,7 +119,6 @@
         </div>
     </div>
 
-    <!-- 修改弹窗 -->
     <div id="editModal">
         <div class="modal-content">
             <div class="modal-header"><h3 id="modalTitle">修改课文</h3><button class="btn btn-cancel" style="padding:4px 8px;" onclick="closeModal()">关闭</button></div>
@@ -159,7 +129,6 @@
         </div>
     </div>
 
-    <!-- 家长端 -->
     <div id="parentScreen" class="page-container" style="display: none;">
         <div class="admin-panel">
             <button class="btn btn-logout" onclick="logout()">退出</button>
@@ -183,7 +152,6 @@
         </div>
     </div>
 
-    <!-- 孩子端主页 -->
     <div id="homeScreen" class="page-container">
         <div class="header" style="text-align:center;">
             <h1>🌸 每日晨读</h1>
@@ -195,7 +163,6 @@
         <button class="btn btn-logout" style="margin-top:20px; align-self:center;" onclick="logout()">退出登录</button>
     </div>
 
-    <!-- 孩子端阅读页 -->
     <div id="readingScreen" class="page-container">
         <div class="top-nav">
             <button class="btn-back" onclick="backToHome()">← 返回</button>
@@ -230,6 +197,7 @@
         const CACHE_KEY_ZH = 'cache_zh_tasks';
         const CACHE_KEY_EN = 'cache_en_tasks';
 
+        // ================= 🎯 终极发音引擎 =================
         let globalAudio = new Audio(); 
         const synth = window.speechSynthesis;
 
@@ -240,10 +208,18 @@
             if (window.speechSynthesis) window.speechSynthesis.cancel();
 
             if (lang === 'en-US') {
-                let cleanText = text.replace(/[.,!?;:'"]/g, '').trim();
-                const audioUrl = `https://dict.youdao.com/dictvoice?le=en&audio=${encodeURIComponent(cleanText)}&type=2`;
+                // 🎯 使用百度翻译的真人发音接口，国内速度极快，绝对不会被拦截
+                let cleanText = text.replace(/[^\x00-\x7F]/g, "").trim(); // 只保留英文字符
+                if(!cleanText) return;
+                
+                // type=1 是英音，type=2 是美音 (这里用美音)
+                const audioUrl = `https://fanyi.baidu.com/gettts?lan=en&text=${encodeURIComponent(cleanText)}&spd=3&source=web`;
+                
                 globalAudio.src = audioUrl;
-                globalAudio.play().catch(err => fallbackSpeak(text, lang));
+                globalAudio.play().catch(err => {
+                    console.log('百度发音失败，降级为慢速机器音', err);
+                    fallbackSpeak(text, lang);
+                });
             } else {
                 fallbackSpeak(text, lang);
             }
@@ -252,7 +228,8 @@
         function fallbackSpeak(text, lang) {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            utterance.rate = (lang === 'en-US') ? 0.8 : 0.85;
+            // 🎯 机器音全部降到 0.5 极慢速
+            utterance.rate = 0.5; 
             const voices = synth.getVoices();
             const targetVoice = voices.find(v => v.lang.includes(lang));
             if (targetVoice) utterance.voice = targetVoice;
@@ -485,6 +462,7 @@
             preloadAudioCache(textToPreload, 'zh-CN');
         }
 
+        // 🎯 英语渲染 (包含单词卡片)
         function renderEnglishTask() {
             let html = '';
             let textToPreload = [];
@@ -511,6 +489,7 @@
         function generateEnglishHtml(task, isExtra) {
             const sentenceList = task.sentences.split('|').map(s => s.trim());
             const transList = task.translation ? task.translation.split('|').map(t => t.trim()) : [];
+            const wordsArray = task.words ? task.words.split(',').map(w => w.trim()) : []; // 🎯 获取单词数组
             const fullText = sentenceList.join('. ');
 
             let res = `<div style="width:100%;">`;
@@ -522,6 +501,22 @@
                     <div class="en-trans">${transList[i] || ''}</div>
                 `;
             });
+            
+            // 🎯 渲染单词卡片
+            if(wordsArray.length > 0) {
+                res += `<div style="text-align:center; color:var(--pink-dark); font-weight:bold; margin-top:20px;">💡 重点单词</div>`;
+                res += `<div class="word-grid">`;
+                wordsArray.forEach(w => {
+                    const pureWord = w.replace(/[^\x00-\x7F]/g, "").trim(); 
+                    const emoji = w.replace(/[a-zA-Z\s]/g, "").trim();
+                    if(!pureWord) return;
+                    res += `
+                    <div class="word-card" onclick="speak('${pureWord}', 'en-US', event)">
+                        <span>${pureWord}</span><span class="emoji">${emoji}</span>
+                    </div>`;
+                });
+                res += `</div>`;
+            }
             res += `</div>`;
             return res;
         }
@@ -539,7 +534,7 @@
             isRecognizing = false;
         }
 
-        // 语音识别与录音
+        // 语音识别与录音 (中文识别放宽到 30%)
         let mediaRecorder, audioChunks = [], isRecording = false;
         let recordedBlob = null; 
         let recognition = null;
@@ -609,7 +604,6 @@
             const btn = document.getElementById('btnRecord');
             btn.disabled = false;
 
-            // 只要录到了声音，哪怕只识别出两个字，也放行
             if (!recognizedText || recognizedText.trim().length < 2) {
                 statusText.innerText = '❌ 没听清哦，请再试一次~';
                 statusText.style.background = '#FFEBEE'; statusText.style.color = '#D32F2F';
@@ -627,7 +621,7 @@
             }
             const accuracy = matchCount / bookClean.length;
 
-            // 🎯 放宽限制：只要读到 30% 就算过关
+            // 🎯 只要达到 30% 就算过关
             if (accuracy > 0.3) { 
                 statusText.innerText = `✅ 读得真棒！识别率 ${Math.round(accuracy*100)}%`;
                 statusText.style.background = '#E8F5E9'; statusText.style.color = '#2E7D32';
