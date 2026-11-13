@@ -1,0 +1,15 @@
+{
+  "name": "晨读小花园",
+  "short_name": "晨读",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFF0F5",
+  "theme_color": "#F48FB1",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3239/3239765.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
