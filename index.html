@@ -18,32 +18,36 @@
         .page-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; box-sizing: border-box; padding: 15px; overflow-y: auto; }
 
         /* 登录 */
-        #loginScreen { z-index: 999; justify-content: center; align-items: center; }
+        #loginScreen { z-index: 999; justify-content: center; align-items: center; display: none;}
         .login-box { background: var(--card); padding: 30px 20px; border-radius: 24px; box-shadow: 0 8px 24px rgba(244,143,177,0.15); width: 100%; max-width: 320px; text-align: center; }
         .login-box h2 { margin-top: 0; color: var(--pink-dark); }
         .login-box input { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid var(--pink-light); border-radius: 12px; font-size: 18px; text-align: center; box-sizing: border-box; outline:none;}
         .login-box input:focus { border-color: var(--pink-dark); }
         .login-btn { width: 100%; padding: 12px; background: var(--pink-dark); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; }
 
-        /* 家长端 */
-        .admin-panel { background: #FFF8E1; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 2px dashed #FFCA28; }
+        /* 家长端双栏布局 */
+        .parent-nav { display: flex; background: #FFF8E1; border-radius: 16px; padding: 5px; margin-bottom: 15px; border: 2px solid #FFCA28; }
+        .parent-nav-btn { flex: 1; text-align: center; padding: 10px; font-weight: bold; color: #E65100; border-radius: 12px; cursor: pointer; transition: all 0.2s;}
+        .parent-nav-btn.active { background: #E65100; color: white; box-shadow: 0 4px 10px rgba(230,81,0,0.3);}
+
+        .admin-panel { background: #FFFFFF; padding: 15px; border-radius: 16px; margin-bottom: 15px; border: 2px dashed #FFCA28; }
         .admin-panel h3 { margin-top: 0; color: #E65100; }
         .admin-row { display: flex; gap: 8px; margin-bottom: 15px; align-items: center; flex-wrap: wrap;}
-        .admin-row input { width: 50px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .admin-row input { width: 60px; padding: 8px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         .btn { border: none; padding: 10px 16px; border-radius: 12px; font-weight: bold; font-size: 15px; color: white; cursor: pointer; }
         .btn-save { background: var(--pink-dark); }
-        .btn-logout { background: #BDBDBD; float: right; padding: 6px 12px; font-size: 14px;}
-        
-        .history-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; background: #fff; border-radius: 8px; overflow: hidden;}
-        .history-table th, .history-table td { border: 1px solid var(--pink-light); padding: 8px; }
+        .btn-logout { background: #BDBDBD; float: right; padding: 6px 12px; font-size: 14px; margin-top: -5px;}
+
+        .history-table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: center; background: #fff; border-radius: 8px; overflow: hidden;}
+        .history-table th, .history-table td { border: 1px solid var(--pink-light); padding: 10px; }
         .history-table th { background: var(--pink-light); color: var(--pink-dark); }
         
-        /* 🎯 英语加餐表单样式 */
+        /* 英语加餐表单 */
         .extra-form input, .extra-form textarea { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 14px; box-sizing: border-box;}
         .extra-form textarea { resize: vertical; height: 60px; }
         .btn-extra { background: #FF9800; width: 100%; padding: 12px; font-size: 16px; margin-top: 5px;}
 
-        .edit-list { max-height: 300px; overflow-y: auto; background: #fff; border-radius: 8px; padding: 10px;}
+        .edit-list { max-height: 250px; overflow-y: auto; background: #fafafa; border-radius: 8px; padding: 10px;}
         .edit-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;}
         .btn-blue { background: var(--blue); padding: 6px 12px; font-size: 14px;}
 
@@ -138,50 +142,58 @@
         </div>
     </div>
 
-    <!-- 🎯 家长控制台 -->
+    <!-- 🎯 家长控制台 (双栏) -->
     <div id="parentScreen" class="page-container" style="display: none;">
-        <div class="admin-panel">
-            <button class="btn btn-logout" onclick="logout()">退出</button>
-            <h3>👩‍🏫 家长控制台</h3>
-            <div class="admin-row">
-                <span>语文进度：第</span><input type="number" id="setWeek" value="1"><span>周，第</span><input type="number" id="setDay" value="1"><span>天</span>
-                <button class="btn btn-save" onclick="saveSettings()">修改</button>
+        <div class="parent-nav">
+            <div class="parent-nav-btn active" id="navChild" onclick="switchParentTab('child')">📊 孩子情况</div>
+            <div class="parent-nav-btn" id="navAdmin" onclick="switchParentTab('admin')">⚙️ 家长控制台</div>
+        </div>
+
+        <!-- 1. 孩子情况面板 -->
+        <div id="tabChild" style="display: block;">
+            <div class="admin-panel" style="background:#E3F2FD; border-color:#64B5F6;">
+                <button class="btn btn-logout" onclick="logout()">退出</button>
+                <h3 style="color:#1565C0;">📊 孩子打卡记录</h3>
+                <table class="history-table" id="historyTable">
+                    <thead><tr><th>日期</th><th>已读篇数</th><th>状态</th></tr></thead>
+                    <tbody id="historyBody"><tr><td colspan="3">加载中...</td></tr></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- 🎯 新增：英语加餐表单 -->
-        <div class="admin-panel extra-form" style="background:#fce4ec; border-color:#E91E63;">
-            <h3 style="color:#C2185B;">🚀 添加英语早读加餐（自主复习）</h3>
-            <p style="font-size:12px; color:#666; margin-top:0;">注：加餐内容会在指定日期出现，不影响正常进度。多句用 | 隔开。</p>
-            
-            <input type="text" id="exTitle" placeholder="标题 (如: Unit 2 单词复习)">
-            <textarea id="exSentences" placeholder="英文句子 (用 | 隔开) 如: Apple is red. | I like apples."></textarea>
-            <textarea id="exTrans" placeholder="中文翻译 (用 | 隔开) 如: 苹果是红色的。 | 我喜欢苹果。"></textarea>
-            <input type="text" id="exWords" placeholder="重点单词 (逗号隔开) 如: apple 🍎, red 🔴">
-            <input type="text" id="exPhonics" placeholder="拼读练习 (逗号隔开) 如: a-p-p-l-e apple">
-            
-            <div style="margin: 10px 0; font-size:14px; font-weight:bold; color:#C2185B;">
-                生效日期：<input type="date" id="exDate" style="padding:5px; border-radius:6px; border:1px solid #ccc;">
+        <!-- 2. 家长控制台面板 -->
+        <div id="tabAdmin" style="display: none;">
+            <div class="admin-panel" style="border-color:#FFCA28;">
+                <button class="btn btn-logout" onclick="logout()">退出</button>
+                <h3>👩‍🏫 进度设置</h3>
+                <div class="admin-row">
+                    <span>语文进度：第</span><input type="number" id="setWeek" value="1"><span>周，第</span><input type="number" id="setDay" value="1"><span>天</span>
+                    <button class="btn btn-save" onclick="saveSettings()">修改</button>
+                </div>
             </div>
-            
-            <button class="btn btn-extra" onclick="addExtraTask()">加入今天 / 指定日期的任务</button>
-        </div>
 
-        <div class="admin-panel" style="background:#E3F2FD; border-color:#64B5F6;">
-            <h3 style="color:#1565C0;">📊 孩子打卡记录</h3>
-            <table class="history-table" id="historyTable">
-                <thead><tr><th>日期</th><th>已读篇数</th><th>状态</th></tr></thead>
-                <tbody id="historyBody"><tr><td colspan="3">加载中...</td></tr></tbody>
-            </table>
-        </div>
-        <div class="admin-panel" style="background:#FFF; border:2px solid var(--pink-dark);">
-            <h3 style="color:var(--pink-dark);">📝 内容校验与修改</h3>
-            <button class="btn btn-blue" onclick="loadEditList()">刷新本周列表</button>
-            <div class="edit-list" id="editListContainer"></div>
+            <div class="admin-panel extra-form" style="background:#fce4ec; border-color:#E91E63;">
+                <h3 style="color:#C2185B;">🚀 添加英语早读加餐</h3>
+                <input type="text" id="exTitle" placeholder="标题 (如: Unit 2 单词复习)">
+                <textarea id="exSentences" placeholder="英文句子 (用 | 隔开) 如: Apple is red. | I like apples."></textarea>
+                <textarea id="exTrans" placeholder="中文翻译 (用 | 隔开) 如: 苹果是红色的。 | 我喜欢苹果。"></textarea>
+                <input type="text" id="exWords" placeholder="重点单词 (逗号隔开) 如: apple 🍎, red 🔴">
+                <input type="text" id="exPhonics" placeholder="拼读练习 (逗号隔开) 如: a-p-p-l-e apple">
+                <div style="margin: 10px 0; font-size:14px; font-weight:bold; color:#C2185B;">
+                    生效日期：<input type="date" id="exDate" style="padding:5px; border-radius:6px; border:1px solid #ccc;">
+                </div>
+                <button class="btn btn-extra" onclick="addExtraTask()">加入今天 / 指定日期的任务</button>
+            </div>
+
+            <div class="admin-panel" style="background:#FFF; border:2px solid var(--pink-dark);">
+                <h3 style="color:var(--pink-dark);">📝 内容校验与修改</h3>
+                <button class="btn btn-blue" onclick="loadEditList()">刷新本周语文列表</button>
+                <div class="edit-list" id="editListContainer"></div>
+            </div>
         </div>
     </div>
 
-    <div id="homeScreen" class="page-container">
+    <div id="homeScreen" class="page-container" style="display: none;">
         <div class="header" style="text-align:center;">
             <h1>🌸 每日晨读</h1>
             <p id="subtitle" style="font-weight:bold; color:#999; font-size:20px;">加载中...</p>
@@ -192,7 +204,7 @@
         <button class="btn btn-logout" style="margin-top:20px; align-self:center;" onclick="logout()">退出登录</button>
     </div>
 
-    <div id="readingScreen" class="page-container">
+    <div id="readingScreen" class="page-container" style="display: none;">
         <div class="top-nav">
             <button class="btn-back" onclick="backToHome()">← 返回</button>
             <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
@@ -319,6 +331,23 @@
             location.reload(); 
         }
 
+        // 🎯 家长端双栏切换逻辑
+        function switchParentTab(tab) {
+            const navChild = document.getElementById('navChild');
+            const navAdmin = document.getElementById('navAdmin');
+            const tabChild = document.getElementById('tabChild');
+            const tabAdmin = document.getElementById('tabAdmin');
+
+            if (tab === 'child') {
+                navChild.classList.add('active'); navAdmin.classList.remove('active');
+                tabChild.style.display = 'block'; tabAdmin.style.display = 'none';
+            } else {
+                navAdmin.classList.add('active'); navChild.classList.remove('active');
+                tabChild.style.display = 'none'; tabAdmin.style.display = 'block';
+                loadEditList(); // 切过来时再加载列表
+            }
+        }
+
         async function initApp() {
             document.getElementById('loginScreen').style.display = 'none';
             const { data: setting } = await db.from('morning_settings').select('*').eq('id', 1).single();
@@ -331,11 +360,11 @@
                 document.getElementById('setWeek').value = currentWeek;
                 document.getElementById('setDay').value = currentDay;
                 
-                // 设置日期选择框默认值为今天
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('exDate').value = today;
 
-                loadEditList(); loadHistory();
+                loadHistory();
+                switchParentTab('child'); // 默认展示孩子情况
             } else {
                 document.getElementById('homeScreen').style.display = 'flex';
                 prefetchTodayData();
@@ -357,18 +386,16 @@
             }
         }
 
-        // 🎯 家长端：保存英语加餐
         async function addExtraTask() {
             const title = document.getElementById('exTitle').value;
             const sentences = document.getElementById('exSentences').value;
             const trans = document.getElementById('exTrans').value;
             const words = document.getElementById('exWords').value;
             const phonics = document.getElementById('exPhonics').value;
-            const dateStr = document.getElementById('exDate').value; // YYYY-MM-DD
+            const dateStr = document.getElementById('exDate').value; 
 
             if(!title || !sentences || !dateStr) { alert('标题、句子和日期不能为空！'); return; }
 
-            // 将 2023-11-01 转换为 2023-11-1 以匹配系统格式
             const d = new Date(dateStr);
             const formattedDate = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
 
@@ -810,9 +837,16 @@
             document.getElementById('homeScreen').style.display = 'flex';
         }
 
+        // 🎯 网页加载时，直接读取本地记忆，实现永久免密登录！
         window.onload = () => {
             if ('speechSynthesis' in window) window.speechSynthesis.getVoices();
-            if (userRole) initApp();
+            if (userRole) {
+                // 只要本地存了身份，直接自动进入，无需输密码！
+                initApp();
+            } else {
+                // 没存身份才显示登录框
+                document.getElementById('loginScreen').style.display = 'flex';
+            }
         };
     </script>
 </body>
